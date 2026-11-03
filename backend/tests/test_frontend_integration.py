@@ -58,6 +58,7 @@ def test_static_frontend_files_served(integration_client):
     routes = [
         "/frontend/index.html",
         "/frontend/dashboard.html",
+        "/frontend/roles.html",
         "/frontend/roadmap.html",
         "/frontend/css/variables.css",
         "/frontend/css/style.css",
@@ -68,6 +69,7 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/js/api.js",
         "/frontend/js/app.js",
         "/frontend/js/dashboard.js",
+        "/frontend/js/roles.js",
         "/frontend/js/roadmap.js",
     ]
     for r in routes:
@@ -105,7 +107,7 @@ def test_complete_frontend_backend_integration_lifecycle(integration_client):
     assert me_res.status_code == 200
     assert me_res.json()["full_name"] == "Frontend Tester"
 
-    # 4. Role retrieval
+    # 4. Role retrieval & discovery
     roles_res = integration_client.get("/api/roles/")
     assert roles_res.status_code == 200
     roles_data = roles_res.json()
@@ -114,6 +116,19 @@ def test_complete_frontend_backend_integration_lifecycle(integration_client):
     role_ids = [r["id"] for r in roles]
     assert "harness-engineer" in role_ids
     assert "backend-engineer" in role_ids
+
+    # 4b. Role details, comparison & market summary
+    detail_res = integration_client.get("/api/roles/backend-engineer")
+    assert detail_res.status_code == 200
+    detail_data = detail_res.json()
+    assert detail_data["canonical_title"] == "Backend Engineer"
+    assert "market_summary" in detail_data
+    assert "related_roles" in detail_data
+
+    compare_res = integration_client.get("/api/roles/compare?role_a=backend-engineer&role_b=harness-engineer")
+    assert compare_res.status_code == 200
+    assert "shared_core_skills" in compare_res.json()
+    assert "overlap_percentage" in compare_res.json()
 
     # 5. Resume upload using FormData
     doc = pymupdf.open()

@@ -1,0 +1,88 @@
+{
+  "_comment": "Documented verified market data records for roles with verified collected job postings. Roles without verified samples fall back to curated guidance.",
+  "roles": {
+    "backend-engineer": {
+      "metadata": {
+        "source": "US Tech Job Postings Public Archive (Q4 2024 - Q1 2025)",
+        "collection_date": "2025-01-15",
+        "geography": "US-Remote",
+        "sample_size": 120,
+        "skill_detection_method": "SkillGraph-Regex-v1.0"
+      },
+      "top_required_skills": [
+        {"skill_id": "python", "canonical_name": "Python", "frequency_count": 96, "frequency_percent": 80.0},
+        {"skill_id": "postgresql", "canonical_name": "PostgreSQL", "frequency_count": 84, "frequency_percent": 70.0},
+        {"skill_id": "docker", "canonical_name": "Docker", "frequency_count": 72, "frequency_percent": 60.0},
+        {"skill_id": "rest_api", "canonical_name": "REST API Design", "frequency_count": 66, "frequency_percent": 55.0},
+        {"skill_id": "fastapi", "canonical_name": "FastAPI", "frequency_count": 62, "frequency_percent": 51.7},
+        {"skill_id": "git", "canonical_name": "Git", "frequency_count": 60, "frequency_percent": 50.0},
+        {"skill_id": "redis", "canonical_name": "Redis", "frequency_count": 54, "frequency_percent": 45.0}
+      ],
+      "top_preferred_skills": [
+        {"skill_id": "kubernetes", "canonical_name": "Kubernetes", "frequency_count": 48, "frequency_percent": 40.0},
+        {"skill_id": "aws", "canonical_name": "AWS", "frequency_count": 42, "frequency_percent": 35.0},
+        {"skill_id": "ci_cd", "canonical_name": "CI/CD Pipelines", "frequency_count": 38, "frequency_percent": 31.7},
+        {"skill_id": "graphql", "canonical_name": "GraphQL", "frequency_count": 30, "frequency_percent": 25.0}
+      ],
+      "experience_distribution": {
+        "entry_0_2_years": 18,
+        "mid_3_5_years": 74,
+        "senior_5_plus_years": 28
+      }
+    },
+    "machine-learning-engineer": {
+      "metadata": {
+        "source": "US Tech Job Postings Public Archive (Q4 2024 - Q1 2025)",
+        "collection_date": "2025-01-15",
+        "geography": "US-Remote",
+        "sample_size": 85,
+        "skill_detection_method": "SkillGraph-Regex-v1.0"
+      },
+      "top_required_skills": [
+        {"skill_id": "python", "canonical_name": "Python", "frequency_count": 76, "frequency_percent": 89.4},
+        {"skill_id": "pytorch", "canonical_name": "PyTorch", "frequency_count": 64, "frequency_percent": 75.3},
+        {"skill_id": "docker", "canonical_name": "Docker", "frequency_count": 51, "frequency_percent": 60.0},
+        {"skill_id": "scikit_learn", "canonical_name": "scikit-learn", "frequency_count": 47, "frequency_percent": 55.3},
+        {"skill_id": "sql", "canonical_name": "SQL", "frequency_count": 43, "frequency_percent": 50.6},
+        {"skill_id": "mlflow", "canonical_name": "MLflow", "frequency_count": 39, "frequency_percent": 45.9}
+      ],
+      "top_preferred_skills": [
+        {"skill_id": "kubernetes", "canonical_name": "Kubernetes", "frequency_count": 34, "frequency_percent": 40.0},
+        {"skill_id": "aws", "canonical_name": "AWS", "frequency_count": 30, "frequency_percent": 35.3},
+        {"skill_id": "airflow", "canonical_name": "Apache Airflow", "frequency_count": 26, "frequency_percent": 30.6}
+      ],
+      "experience_distribution": {
+        "entry_0_2_years": 4,
+        "mid_3_5_years": 56,
+        "senior_5_plus_years": 25
+      }
+    },
+    "data-engineer": {
+      "metadata": {
+        "source": "US Tech Job Postings Public Archive (Q4 2024 - Q1 2025)",
+        "collection_date": "2025-01-15",
+        "geography": "US-Remote",
+        "sample_size": 75,
+        "skill_detection_method": "SkillGraph-Regex-v1.0"
+      },
+      "top_required_skills": [
+        {"skill_id": "sql", "canonical_name": "SQL", "frequency_count": 71, "frequency_percent": 94.7},
+        {"skill_id": "python", "canonical_name": "Python", "frequency_count": 68, "frequency_percent": 90.7},
+        {"skill_id": "airflow", "canonical_name": "Apache Airflow", "frequency_count": 48, "frequency_percent": 64.0},
+        {"skill_id": "spark", "canonical_name": "Apache Spark", "frequency_count": 45, "frequency_percent": 60.0},
+        {"skill_id": "docker", "canonical_name": "Docker", "frequency_count": 41, "frequency_percent": 54.7},
+        {"skill_id": "dbt", "canonical_name": "dbt", "frequency_count": 38, "frequency_percent": 50.7}
+      ],
+      "top_preferred_skills": [
+        {"skill_id": "kafka", "canonical_name": "Apache Kafka", "frequency_count": 34, "frequency_percent": 45.3},
+        {"skill_id": "aws", "canonical_name": "AWS", "frequency_count": 32, "frequency_percent": 42.7},
+        {"skill_id": "kubernetes", "canonical_name": "Kubernetes", "frequency_count": 25, "frequency_percent": 33.3}
+      ],
+      "experience_distribution": {
+        "entry_0_2_years": 10,
+        "mid_3_5_years": 48,
+        "senior_5_plus_years": 17
+      }
+    }
+  }
+}

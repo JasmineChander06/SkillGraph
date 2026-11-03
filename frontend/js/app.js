@@ -32,6 +32,7 @@ const App = (() => {
       const isCurrent = (
         (href === "index.html" && (currentPath.endsWith("index.html") || currentPath.endsWith("/"))) ||
         (href === "dashboard.html" && currentPath.endsWith("dashboard.html")) ||
+        (href === "roles.html" && currentPath.endsWith("roles.html")) ||
         (href === "roadmap.html" && currentPath.endsWith("roadmap.html"))
       );
 

@@ -109,13 +109,18 @@ const API = (() => {
       }
     },
 
-    // 3. Roles
+    // 3. Roles & Taxonomy
     roles: {
-      list: async () => {
-        const res = await request("/api/roles/", { method: "GET" });
+      list: async (params = {}) => {
+        const query = new URLSearchParams(params).toString();
+        const url = query ? `/api/roles/?${query}` : "/api/roles/";
+        const res = await request(url, { method: "GET" });
         return Array.isArray(res) ? res : (res && res.roles) ? res.roles : [];
       },
-      get: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}`, { method: "GET" })
+      get: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}`, { method: "GET" }),
+      getRelated: (roleId, topN = 4) => request(`/api/roles/${encodeURIComponent(roleId)}/related?top_n=${topN}`, { method: "GET" }),
+      compare: (roleA, roleB) => request(`/api/roles/compare?role_a=${encodeURIComponent(roleA)}&role_b=${encodeURIComponent(roleB)}`, { method: "GET" }),
+      getMarketSummary: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}/market-summary`, { method: "GET" })
     },
 
     // 4. Resume

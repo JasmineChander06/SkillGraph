@@ -461,7 +461,21 @@ The FastAPI backend implements the exact REST contracts expected by the frontend
 * **`GET /api/progress`**:
   * Response: `ProgressSummaryResponse` with total tasks, completed, in-progress, pending, completion percentage, and active roadmap tasks list.
 
-### 7.6 GitHub Analysis
+### 7.6 Role Discovery & Evidence-Aware Market Insights
+
+* **`GET /api/roles/`**:
+  * Query parameters: `family`, `level`, `maturity` (`established` | `emerging`), `q` (free-text search).
+  * Returns complete catalog of 11 roles with maturity classification and highlighted core skills.
+* **`GET /api/roles/compare?role_a={id}&role_b={id}`**:
+  * Bidirectional skill overlap calculation, Jaccard similarity percentage, shared core competencies, unique specializations, and transition bridge skills with estimated study hours.
+* **`GET /api/roles/{role_id}`**:
+  * Comprehensive profile including responsibilities, prerequisites, enriched core and optional skills, milestone projects, emerging discipline context, accessibility guidance, related roles, and market summary.
+* **`GET /api/roles/{role_id}/related?top_n={n}`**:
+  * Ranked related role suggestions based on composite Jaccard skill overlap.
+* **`GET /api/roles/{role_id}/market-summary`**:
+  * Evidence-aware market summary carrying documented provenance (source, collection date, geography, sample size) for verified roles, or transparent curated guidance disclaimers for unverified roles. Never generates fake statistics or synthetic salaries.
+
+### 7.7 GitHub Analysis
 
 * **`GET /github/analyze?username={username}`**
   * Response:

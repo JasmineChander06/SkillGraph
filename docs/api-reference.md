@@ -257,27 +257,99 @@ SkillGraph uses standard HTTP Bearer token authentication with JSON Web Tokens (
 
 ---
 
-## 5. Curated Role Ontologies
+## 5. Curated Role Ontologies, Discovery & Market Insights
 
 ### `GET /api/roles/`
 * **Method:** `GET`
 * **Path:** `/api/roles/`
 * **Authentication:** None (Public)
-* **Description:** Returns the complete catalog of 11 industry role profiles.
+* **Query Parameters:**
+  | Parameter | Type | Required | Description |
+  | :--- | :--- | :--- | :--- |
+  | `family` | `string` | No | Filter by role family (`AI/ML`, `Engineering`, `Data`, `DevOps/Platform`). |
+  | `level` | `string` | No | Filter by experience level (`entry`, `mid`, `senior`). |
+  | `maturity` | `string` | No | Filter by maturity classification (`established` or `emerging`). |
+  | `q` | `string` | No | Free-text search query across canonical title, description, and key skills. |
+* **Description:** Returns the complete catalog of 11 industry role profiles, supporting the expanded career taxonomy (including Harness Engineer, Forward Deployed Engineer, AI Agent Engineer, LLMOps Engineer, AI Evaluation Engineer, and AI Infrastructure Engineer).
 * **Successful Response (`200 OK`):**
   ```json
-  [
-    {
-      "id": "harness-engineer",
-      "canonical_title": "Harness Engineer",
-      "role_family": "AI Engineering",
-      "description": "Designs deterministic and agentic evaluation harnesses...",
-      "experience_level": "Mid to Senior",
-      "entry_level_accessible": false,
-      "core_skills": ["python", "docker", "eval-harness", "pytest"]
-    }
-  ]
+  {
+    "roles": [
+      {
+        "id": "harness-engineer",
+        "canonical_title": "Harness Engineer",
+        "role_family": "DevOps/Platform",
+        "description": "Designs, implements, and maintains CI/CD, deployment, and platform engineering workflows...",
+        "experience_level": "mid",
+        "entry_level_accessible": false,
+        "maturity": "emerging",
+        "highlight_skills": ["Docker", "Kubernetes", "Git", "AWS"],
+        "core_skill_count": 7
+      }
+    ]
+  }
   ```
+
+---
+
+### `GET /api/roles/compare`
+* **Method:** `GET`
+* **Path:** `/api/roles/compare`
+* **Authentication:** None (Public)
+* **Query Parameters:**
+  | Parameter | Type | Required | Description |
+  | :--- | :--- | :--- | :--- |
+  | `role_a` | `string` | Yes | First role ID (e.g. `backend-engineer`). |
+  | `role_b` | `string` | Yes | Second role ID (e.g. `data-engineer`). |
+* **Description:** Performs deterministic bidirectional skill overlap analysis and computes transition bridge skills with estimated study hours.
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "role_a": {
+      "id": "backend-engineer",
+      "canonical_title": "Backend Engineer",
+      "role_family": "Engineering",
+      "experience_level": "mid",
+      "maturity": "established",
+      "entry_level_accessible": true
+    },
+    "role_b": {
+      "id": "data-engineer",
+      "canonical_title": "Data Engineer",
+      "role_family": "Data",
+      "experience_level": "mid",
+      "maturity": "established",
+      "entry_level_accessible": true
+    },
+    "shared_core_skills": [
+      {"id": "docker", "canonical_name": "Docker", "category": "DevOps", "estimated_hours": 25},
+      {"id": "python", "canonical_name": "Python", "category": "Language", "estimated_hours": 40}
+    ],
+    "unique_to_role_a": [
+      {"id": "fastapi", "canonical_name": "FastAPI", "category": "Backend Framework", "estimated_hours": 35}
+    ],
+    "unique_to_role_b": [
+      {"id": "airflow", "canonical_name": "Apache Airflow", "category": "Data Engineering", "estimated_hours": 30},
+      {"id": "spark", "canonical_name": "Apache Spark", "category": "Data Engineering", "estimated_hours": 45}
+    ],
+    "overlap_percentage": 27.3,
+    "shared_core_count": 3,
+    "total_unique_core_count": 11,
+    "transition_a_to_b": {
+      "target_role": "Data Engineer",
+      "bridge_skills": [...],
+      "bridge_skills_count": 4,
+      "estimated_hours": 135
+    },
+    "transition_b_to_a": {
+      "target_role": "Backend Engineer",
+      "bridge_skills": [...],
+      "bridge_skills_count": 4,
+      "estimated_hours": 115
+    }
+  }
+  ```
+* **Errors:** `404 Not Found` (non-existent role ID), `422 Unprocessable Content` (missing query parameters).
 
 ---
 
@@ -285,9 +357,90 @@ SkillGraph uses standard HTTP Bearer token authentication with JSON Web Tokens (
 * **Method:** `GET`
 * **Path:** `/api/roles/{role_id}`
 * **Authentication:** None (Public)
-* **Description:** Returns full profile including responsibilities, prerequisites, example projects, learning resources, and market evidence.
+* **Description:** Returns the comprehensive profile for a role, including responsibilities, prerequisites, enriched core and optional skills, real-world milestone projects, emerging discipline context, top related roles, and market summary.
 * **Path Parameter:** `role_id` (e.g. `harness-engineer`, `backend-engineer`, `llmops-engineer`).
-* **Successful Response (`200 OK`):** Full profile schema including `core_skills`, `recommended_skills`, `optional_skills`, and `market_evidence`.
+* **Successful Response (`200 OK`):** Enriched schema containing `responsibilities`, `prerequisites_details`, `core_skills_details`, `recommended_skills_details`, `optional_skills_details`, `example_projects`, `maturity`, `emerging_context`, `related_roles`, and `market_summary`.
+* **Errors:** `404 Not Found` for invalid role ID.
+
+---
+
+### `GET /api/roles/{role_id}/related`
+* **Method:** `GET`
+* **Path:** `/api/roles/{role_id}/related`
+* **Authentication:** None (Public)
+* **Query Parameters:**
+  | Parameter | Type | Default | Description |
+  | :--- | :--- | :--- | :--- |
+  | `top_n` | `integer` | 4 | Maximum number of suggestions (1–10). |
+* **Description:** Returns ranked related role suggestions based on composite Jaccard skill overlap, with shared competencies and missing bridge skills.
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "role_id": "ai-agent-engineer",
+    "canonical_title": "AI Agent Engineer",
+    "related_roles": [
+      {
+        "role_id": "forward-deployed-ai-engineer",
+        "canonical_title": "Forward Deployed AI Engineer",
+        "role_family": "AI/ML",
+        "experience_level": "senior",
+        "maturity": "emerging",
+        "entry_level_accessible": false,
+        "overlap_percentage": 58.2,
+        "shared_core_count": 5,
+        "shared_skills": [...],
+        "bridge_skills": [...]
+      }
+    ]
+  }
+  ```
+* **Errors:** `404 Not Found` for invalid role ID.
+
+---
+
+### `GET /api/roles/{role_id}/market-summary`
+* **Method:** `GET`
+* **Path:** `/api/roles/{role_id}/market-summary`
+* **Authentication:** None (Public)
+* **Description:** Returns evidence-aware market summary. Uses only actual collected job descriptions with documented provenance (source, collection date, geography, sample size). When no statistically sufficient dataset is available (e.g. for emerging roles), returns transparent curated guidance with explicit disclaimers rather than fabricated counts or synthetic salaries.
+* **Successful Response (`200 OK`) — Verified Dataset Case:**
+  ```json
+  {
+    "role_id": "backend-engineer",
+    "has_verified_data": true,
+    "metadata": {
+      "source": "US Tech Job Postings Public Archive (Q4 2024 - Q1 2025)",
+      "collection_date": "2025-01-15",
+      "geography": "US-Remote",
+      "sample_size": 120,
+      "skill_detection_method": "SkillGraph-Regex-v1.0"
+    },
+    "top_required_skills": [
+      {"skill_id": "python", "canonical_name": "Python", "frequency_count": 96, "frequency_percent": 80.0},
+      {"skill_id": "postgresql", "canonical_name": "PostgreSQL", "frequency_count": 84, "frequency_percent": 70.0}
+    ],
+    "top_preferred_skills": [
+      {"skill_id": "kubernetes", "canonical_name": "Kubernetes", "frequency_count": 48, "frequency_percent": 40.0}
+    ],
+    "experience_distribution": {
+      "entry_0_2_years": 18,
+      "mid_3_5_years": 74,
+      "senior_5_plus_years": 28
+    },
+    "data_notice": "Empirical summary calculated from 120 verified job descriptions collected on 2025-01-15 (US-Remote). No synthetic data."
+  }
+  ```
+* **Successful Response (`200 OK`) — Curated Guidance Fallback (Emerging Roles):**
+  ```json
+  {
+    "role_id": "ai-evaluation-engineer",
+    "has_verified_data": false,
+    "guidance_type": "curated_competency_framework",
+    "data_notice": "Curated guidance: No statistically verified dataset of job postings with sufficient sample size is currently available for this role. SkillGraph strictly prohibits generating synthetic sample sizes, speculative percentages, or fabricated salary estimates.",
+    "curated_skills": [...],
+    "recommendation": "Treat the curated core skills and example projects as foundational learning benchmarks rather than empirical hiring statistics. Individual employer requirements vary significantly."
+  }
+  ```
 * **Errors:** `404 Not Found` for invalid role ID.
 
 ---
