@@ -13,6 +13,7 @@ const App = (() => {
     setupMobileMenu();
     setupAuthModal();
     setupAuthUI();
+    setupAuthListeners();
     updateCopyright();
     await checkBackendConnectivity();
   };
@@ -58,6 +59,25 @@ const App = (() => {
   };
 
   /**
+   * Listen for custom auth events across modules
+   */
+  const setupAuthListeners = () => {
+    // When session expires
+    window.addEventListener("sg:auth-expired", (e) => {
+      setupAuthUI();
+      showToast(e.detail?.message || "Session expired. Please sign in again.", "error");
+      openAuthModal("signin");
+    });
+
+    // When user logs in or out
+    window.addEventListener("sg:auth-changed", () => {
+      setupAuthUI();
+      if (typeof window.refreshDashboard === "function") window.refreshDashboard();
+      if (typeof window.refreshRoadmap === "function") window.refreshRoadmap();
+    });
+  };
+
+  /**
    * Update header action buttons based on login state
    */
   const setupAuthUI = () => {
@@ -73,21 +93,22 @@ const App = (() => {
         <span class="eyebrow-pill" style="text-transform:none; font-family:var(--font-sans);">
           ${escapeHtml(displayName)}
         </span>
-        <button id="auth-signout-btn" class="btn btn-outline btn-sm">
+        <button id="auth-signout-btn" class="btn btn-outline btn-sm" type="button">
           Sign out
         </button>
       `;
 
       document.getElementById("auth-signout-btn")?.addEventListener("click", () => {
         API.auth.logout();
+        showToast("Signed out successfully.", "info");
         window.location.reload();
       });
     } else {
       headerActions.innerHTML = `
-        <button id="auth-signin-btn" class="btn btn-outline btn-sm">
+        <button id="auth-signin-btn" class="btn btn-outline btn-sm" type="button">
           Sign in
         </button>
-        <button id="auth-signup-btn" class="btn btn-primary btn-sm">
+        <button id="auth-signup-btn" class="btn btn-primary btn-sm" type="button">
           Get started
         </button>
       `;
@@ -101,7 +122,6 @@ const App = (() => {
    * Build and manage the Auth Modal Dialog
    */
   const setupAuthModal = () => {
-    // Check if modal backdrop already exists
     authModal = document.getElementById("auth-modal");
     if (!authModal) {
       const modalEl = document.createElement("div");
@@ -121,14 +141,14 @@ const App = (() => {
 
           <div id="modal-alert-container"></div>
 
-          <form id="modal-auth-form">
+          <form id="modal-auth-form" novalidate>
             <div id="field-name-group" class="form-group hidden">
-              <label class="form-label" for="modal-name">Name</label>
+              <label class="form-label" for="modal-name">Full Name</label>
               <input id="modal-name" class="form-input" type="text" placeholder="Ada Lovelace" autocomplete="name" />
             </div>
 
             <div class="form-group">
-              <label class="form-label" for="modal-email">Email</label>
+              <label class="form-label" for="modal-email">Email Address</label>
               <input id="modal-email" class="form-input" type="email" placeholder="you@work.com" required autocomplete="email" />
             </div>
 
@@ -143,7 +163,7 @@ const App = (() => {
           </form>
 
           <p style="font-size:0.75rem; color:var(--muted-foreground); text-align:center; margin-top:1.25rem;">
-            JWT authenticated • Secure PBKDF2 password protection
+            JWT authenticated &bull; Salted PBKDF2 password hashing &bull; Zero plaintext retention
           </p>
         </div>
       `;
@@ -155,6 +175,13 @@ const App = (() => {
     document.getElementById("modal-close")?.addEventListener("click", closeAuthModal);
     authModal.addEventListener("click", (e) => {
       if (e.target === authModal) closeAuthModal();
+    });
+
+    // ESC key closes modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && authModal.classList.contains("open")) {
+        closeAuthModal();
+      }
     });
 
     const tabSignIn = document.getElementById("modal-tab-signin");
@@ -178,7 +205,7 @@ const App = (() => {
       clearModalAlert();
     });
 
-    // Form submission
+    // Form submission with client-side validation
     const authForm = document.getElementById("modal-auth-form");
     authForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -187,6 +214,18 @@ const App = (() => {
       const password = document.getElementById("modal-password").value;
       const name = document.getElementById("modal-name")?.value.trim();
 
+      // Client validation
+      const emailRegex = /^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$/;
+      if (!email || !emailRegex.test(email)) {
+        showModalAlert("Please enter a valid email address.", "error");
+        return;
+      }
+
+      if (!password || password.length < 8) {
+        showModalAlert("Password must be at least 8 characters long.", "error");
+        return;
+      }
+
       submitBtn.disabled = true;
       submitBtn.textContent = "Authenticating…";
       clearModalAlert();
@@ -194,13 +233,17 @@ const App = (() => {
       try {
         let resp;
         if (isSignUp) {
-          resp = await API.auth.register({ email, password, full_name: name });
+          resp = await API.auth.register({ email, password, full_name: name || undefined });
         } else {
           resp = await API.auth.login({ email, password });
         }
 
-        // Save session
-        localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, resp.access_token || resp.token);
+        // Store only the JWT access token and public user metadata
+        // Note: Password is NEVER stored in localStorage
+        const token = resp.access_token || resp.token;
+        if (token) {
+          localStorage.setItem(CONFIG.STORAGE_KEYS.TOKEN, token);
+        }
         if (resp.user) {
           localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(resp.user));
         }
@@ -209,12 +252,11 @@ const App = (() => {
         setupAuthUI();
         showToast(isSignUp ? "Account created successfully." : "Signed in successfully.", "success");
 
-        // If on dashboard or roadmap, reload data
-        if (typeof window.refreshDashboard === "function") window.refreshDashboard();
-        if (typeof window.refreshRoadmap === "function") window.refreshRoadmap();
+        // Trigger auth changed event
+        window.dispatchEvent(new CustomEvent("sg:auth-changed"));
 
       } catch (err) {
-        showModalAlert(err.message || "Authentication failed.", "error");
+        showModalAlert(err.message || "Authentication failed. Please check your credentials.", "error");
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = isSignUp ? "Create account" : "Sign in";
@@ -279,7 +321,7 @@ const App = (() => {
       badgeElements.forEach(badge => {
         badge.innerHTML = `
           <span class="status-dot live" aria-hidden="true"></span>
-          <span>Live · ${escapeHtml(health.version || "v1.0")}</span>
+          <span>Live &bull; ${escapeHtml(health.version || "v1.0")}</span>
         `;
         badge.title = `Connected to ${CONFIG.API_BASE_URL}`;
       });
@@ -289,7 +331,7 @@ const App = (() => {
           <span class="status-dot demo" aria-hidden="true"></span>
           <span>Offline mode</span>
         `;
-        badge.title = "Backend unreachable. Start backend server at http://127.0.0.1:8000";
+        badge.title = `Backend unreachable. Run backend server at ${CONFIG.API_BASE_URL}`;
       });
     }
   };
@@ -349,7 +391,7 @@ const App = (() => {
   };
 
   const escapeHtml = (str) => {
-    if (!str) return "";
+    if (str === null || str === undefined) return "";
     return String(str)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -369,4 +411,3 @@ const App = (() => {
 
 // Auto-initialize on DOM ready
 document.addEventListener("DOMContentLoaded", App.init);
-

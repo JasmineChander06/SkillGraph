@@ -4,6 +4,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+
 from app.api.auth import router as auth_router
 from app.api.job_descriptions import router as job_descriptions_router
 from app.api.resume import router as resume_router
@@ -12,6 +15,8 @@ from app.api.roles import router as roles_router
 from app.api.skills import router as skills_router
 from app.config import settings
 from app.database import init_db
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
 
 
 @asynccontextmanager
@@ -48,6 +53,10 @@ app.include_router(roles_router)
 app.include_router(skills_router)
 app.include_router(job_descriptions_router)
 app.include_router(roadmap_router)
+
+# Serve Frontend static assets if available
+if FRONTEND_DIR.is_dir():
+    app.mount("/frontend", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
 
 
 @app.get("/api/health", tags=["Health"])

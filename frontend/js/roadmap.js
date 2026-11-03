@@ -21,7 +21,8 @@ const RoadmapView = (() => {
 
     let roles = [];
     try {
-      roles = await API.roles.list();
+      const res = await API.roles.list();
+      roles = (Array.isArray(res) && res.length > 0) ? res : CONFIG.DEFAULT_ROLES;
     } catch {
       roles = CONFIG.DEFAULT_ROLES;
     }
@@ -217,11 +218,26 @@ const RoadmapView = (() => {
       `;
     }).join("");
 
+    const capstoneHtml = roadmap.capstone_project ? `
+      <div class="card card-dark" style="margin-top:2.5rem; padding:2rem 2.25rem;">
+        <span class="eyebrow-pill" style="background:rgba(251,249,245,0.15); border-color:rgba(251,249,245,0.25); color:var(--background); margin-bottom:0.75rem;">
+          Capstone Milestone
+        </span>
+        <h4 style="font-family:var(--font-display); font-size:1.45rem; color:var(--background); margin-bottom:0.5rem;">
+          Final Synthesis Project
+        </h4>
+        <p style="color:rgba(251,249,245,0.85); font-size:0.95rem; line-height:1.55;">
+          ${App.escapeHtml(roadmap.capstone_project)}
+        </p>
+      </div>
+    ` : "";
+
     timelineContainer.innerHTML = `
       <div class="timeline-container">
         <div class="timeline-rail" aria-hidden="true"></div>
         ${weeksHtml}
       </div>
+      ${capstoneHtml}
     `;
 
     attachTaskListeners();

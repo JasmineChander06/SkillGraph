@@ -168,30 +168,30 @@
         </div>
       </a>
 
-      <a href="#job-section" class="card quick-nav-card">
+      <a href="#skills-section" class="card quick-nav-card">
         <div>
           <div class="quick-nav-icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <h3 class="quick-nav-title">Analyze gaps</h3>
+          <p class="quick-nav-sub">Benchmark skills against 11 curated role ontologies.</p>
+        </div>
+        <div class="quick-nav-footer">
+          <span>Evaluate role</span>
+          <span class="quick-nav-arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <a href="#job-section" class="card quick-nav-card">
+        <div>
+          <div class="quick-nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
           </div>
           <h3 class="quick-nav-title">Match a job</h3>
           <p class="quick-nav-sub">Score any job description for required vs. preferred skills.</p>
         </div>
         <div class="quick-nav-footer">
           <span>Compare alignment</span>
-          <span class="quick-nav-arrow">&rarr;</span>
-        </div>
-      </a>
-
-      <a href="roadmap.html" class="card quick-nav-card">
-        <div>
-          <div class="quick-nav-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
-          </div>
-          <h3 class="quick-nav-title">6-week roadmap</h3>
-          <p class="quick-nav-sub">Actionable checklist ordered by foundational prerequisites.</p>
-        </div>
-        <div class="quick-nav-footer">
-          <span>Track milestones</span>
           <span class="quick-nav-arrow">&rarr;</span>
         </div>
       </a>
@@ -230,7 +230,56 @@
       </div>
     </section>
 
-    <!-- 6. Interactive Tool: Job Description Matcher -->
+    <!-- 6. Interactive Tool: Skill Gap Analysis -->
+    <section id="skills-section" class="interactive-tool-section section-anchor">
+      <div style="margin-bottom: 1.5rem;">
+        <span class="eyebrow-pill">Analysis</span>
+        <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Skill-gap analysis.</h2>
+        <p style="color:var(--muted-foreground); margin-top:0.35rem;">
+          Benchmark your resume text against any curated engineering role to see matched, missing, and uncertain competencies.
+        </p>
+      </div>
+
+      <div class="card">
+        <form id="skill-gap-form">
+          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="skills-role-select">Target Engineering Role</label>
+              <select id="skills-role-select" class="form-select" aria-label="Target Role">
+                <option value="harness-engineer">Harness Engineer</option>
+                <option value="backend-engineer">Backend Engineer</option>
+                <option value="machine-learning-engineer">Machine Learning Engineer</option>
+              </select>
+            </div>
+
+            <div style="display:flex; align-items:flex-end;">
+              <button id="skills-analyze-btn" class="btn btn-primary" type="submit" style="height:44px; width:100%; justify-content:center;">
+                Analyze skill gaps &rarr;
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="flex items-center justify-between" style="margin-bottom:0.4rem;">
+              <label class="form-label" for="skills-resume-text">Candidate Resume Text</label>
+              <span id="skills-text-synced-badge" class="eyebrow-pill" style="font-size:0.65rem; text-transform:none;">
+                Synced from parsed resume
+              </span>
+            </div>
+            <textarea
+              id="skills-resume-text"
+              class="form-textarea"
+              placeholder="Resume plain text will automatically sync here when you parse a resume above, or you can paste text directly."
+              rows="4"
+            ></textarea>
+          </div>
+        </form>
+
+        <div id="skills-results-container" class="hidden"></div>
+      </div>
+    </section>
+
+    <!-- 7. Interactive Tool: Job Description Matcher -->
     <section id="job-section" class="interactive-tool-section section-anchor">
       <div style="margin-bottom: 1.5rem;">
         <span class="eyebrow-pill">Match</span>
@@ -286,4 +335,3 @@
   <script src="js/dashboard.js"></script>
 </body>
 </html>
-

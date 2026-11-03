@@ -30,6 +30,19 @@ const API = (() => {
       const errorMsg = (data && data.detail)
         ? (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail))
         : `Request failed with status ${response.status}`;
+
+      // Handle Expired or Invalid Authentication
+      if (response.status === 401) {
+        const hadToken = !!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN);
+        if (hadToken) {
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
+          localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
+          window.dispatchEvent(new CustomEvent("sg:auth-expired", {
+            detail: { message: errorMsg }
+          }));
+        }
+      }
+
       const error = new Error(errorMsg);
       error.status = response.status;
       error.data = data;
@@ -54,9 +67,9 @@ const API = (() => {
       const response = await fetch(url, fetchOptions);
       return await handleResponse(response);
     } catch (err) {
-      // Re-throw with helpful message if network completely failed
+      // Network unreachable fallback
       if (!err.status && err.name === "TypeError") {
-        const netErr = new Error("Unable to connect to SkillGraph backend server.");
+        const netErr = new Error("Unable to connect to SkillGraph backend server at " + CONFIG.API_BASE_URL);
         netErr.status = 0;
         throw netErr;
       }
@@ -84,6 +97,7 @@ const API = (() => {
       logout: () => {
         localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);
+        window.dispatchEvent(new CustomEvent("sg:auth-changed"));
       },
       isAuthenticated: () => !!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN),
       getUser: () => {
@@ -97,7 +111,10 @@ const API = (() => {
 
     // 3. Roles
     roles: {
-      list: () => request("/api/roles/", { method: "GET" }),
+      list: async () => {
+        const res = await request("/api/roles/", { method: "GET" });
+        return Array.isArray(res) ? res : (res && res.roles) ? res.roles : [];
+      },
       get: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}`, { method: "GET" })
     },
 
@@ -116,7 +133,7 @@ const API = (() => {
       deleteRecord: (id) => request(`/api/resume/records/${id}`, { method: "DELETE" })
     },
 
-    // 5. Skills & Analysis
+    // 5. Skills & Gap Analysis
     skills: {
       analyze: (text, roleId) => request("/api/skills/analyze", {
         method: "POST",
@@ -163,4 +180,3 @@ const API = (() => {
     }
   };
 })();
-
