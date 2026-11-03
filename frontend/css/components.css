@@ -1,0 +1,404 @@
+/* ==========================================================================
+   SkillGraph Reusable Component Library ("Paper & Ink" Edition)
+   ========================================================================== */
+
+/* 1. Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: var(--transition-smooth);
+  user-select: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+.btn-primary:hover {
+  background-color: var(--ink-2);
+}
+
+.btn-secondary {
+  background-color: var(--secondary);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--card);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.btn-outline:hover {
+  background-color: var(--secondary);
+  border-color: var(--foreground);
+}
+
+.btn-accent {
+  background-color: var(--highlight);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.btn-accent:hover {
+  opacity: 0.92;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.btn-lg {
+  padding: 0.85rem 1.85rem;
+  font-size: 1rem;
+}
+
+.btn:disabled, .btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 2. Cards */
+.card {
+  position: relative;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: var(--transition-smooth);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-subtle);
+}
+
+.card-sm {
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+}
+
+.card-dashed {
+  background-color: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+}
+
+.card-dark {
+  background-color: var(--foreground);
+  color: var(--background);
+  border-radius: var(--radius-xl);
+  border: none;
+}
+
+/* 3. Badges, Eyebrows & Status Pills */
+.eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.85rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.status-dot.live {
+  background-color: #10B981; /* Emerald */
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.status-dot.demo {
+  background-color: #9CA3AF; /* Muted gray */
+}
+
+.status-dot.awaiting {
+  background-color: var(--highlight);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--foreground);
+}
+
+.skill-tag.missing {
+  border-style: dashed;
+  background-color: transparent;
+  color: var(--muted-foreground);
+}
+
+/* 4. Form Controls */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+
+.form-label {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.form-textarea {
+  border-radius: var(--radius-md);
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 3px rgba(22, 22, 22, 0.08);
+}
+
+/* Segmented Control Pill */
+.segmented-pill {
+  display: inline-flex;
+  padding: 0.25rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background-color: var(--card);
+  gap: 0.25rem;
+}
+
+.segmented-pill-btn {
+  padding: 0.4rem 1rem;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.segmented-pill-btn.active {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+/* 5. Progress Bars */
+.progress-track {
+  width: 100%;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--secondary);
+  overflow: hidden;
+}
+
+.progress-track.thick {
+  height: 0.75rem;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background-color: var(--foreground);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.progress-fill.accent {
+  background-color: var(--highlight);
+}
+
+/* 6. Standard Page Header */
+.page-header {
+  padding-top: 3.5rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.page-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.page-header-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  line-height: 1.05;
+  margin-top: 0.75rem;
+}
+
+.page-header-sub {
+  margin-top: 0.75rem;
+  max-width: 650px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+/* 7. Modal & Dialog Overlay */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background-color: rgba(22, 22, 22, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2.25rem;
+  box-shadow: var(--shadow-float);
+  transform: scale(0.96) translateY(8px);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop.open .modal-card {
+  transform: scale(1) translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.modal-close-btn:hover {
+  color: var(--foreground);
+}
+
+/* 8. Alert Banners */
+.alert-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.alert-box.info {
+  background-color: var(--secondary);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+}
+
+.alert-box.error {
+  background-color: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+}
+
+.alert-box.success {
+  background-color: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  color: #065F46;
+}
+

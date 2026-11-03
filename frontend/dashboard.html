@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SkillGraph</title>
+  <meta name="description" content="View your technical readiness trajectory, 6-axis skill radar, and target role benchmarks." />
+
+  <!-- Google Web Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+  <!-- Theme Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+
+  <!-- Sticky Header Bar -->
+  <header class="site-header" role="banner">
+    <div class="header-container">
+      <a href="index.html" class="brand-link" aria-label="SkillGraph Homepage">
+        <span class="brand-badge" aria-hidden="true">S</span>
+        <span>SkillGraph<span class="brand-suffix">.ai</span></span>
+      </a>
+
+      <nav class="nav-links-desktop" aria-label="Primary Navigation">
+        <a href="index.html" class="nav-pill">Overview</a>
+        <a href="dashboard.html" class="nav-pill active">Dashboard</a>
+        <a href="roadmap.html" class="nav-pill">Roadmap</a>
+        <span class="source-badge">
+          <span class="status-dot awaiting" aria-hidden="true"></span>
+          <span>Connecting…</span>
+        </span>
+      </nav>
+
+      <div class="header-actions">
+        <div id="header-actions" class="flex items-center gap-2"></div>
+        <button id="mobile-menu-toggle" class="mobile-menu-btn" type="button" aria-label="Toggle navigation menu" aria-expanded="false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobile-nav-drawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
+      <a href="index.html" class="mobile-nav-link">Overview</a>
+      <a href="dashboard.html" class="mobile-nav-link active">Dashboard</a>
+      <a href="roadmap.html" class="mobile-nav-link">Roadmap</a>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Content -->
+  <main class="container">
+    <!-- Standard Page Header -->
+    <header class="page-header">
+      <div class="page-header-row">
+        <div>
+          <span class="eyebrow-pill">Overview</span>
+          <h1 class="page-header-title">Your readiness graph.</h1>
+          <p class="page-header-sub">
+            A single view of where you stand, what's missing, and what to ship next.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="#resume-section" class="btn btn-primary btn-sm">
+            Update resume &rarr;
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- 1. KPI Stats Grid (4 Columns) -->
+    <section aria-label="Key Performance Indicators" class="kpi-grid">
+      <div class="card kpi-card">
+        <span class="kpi-title">Readiness</span>
+        <div id="kpi-readiness" class="kpi-value">78%</div>
+        <span class="kpi-delta positive">+7 this month</span>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-title">Skills tracked</span>
+        <div id="kpi-skills" class="kpi-value">12</div>
+        <span class="kpi-delta">Extracted from resume</span>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-title">Roles compared</span>
+        <div class="kpi-value">11</div>
+        <span class="kpi-delta">Curated ontologies</span>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-title">Active roadmaps</span>
+        <div id="kpi-roadmaps" class="kpi-value">1</div>
+        <span class="kpi-delta">6-week curriculum</span>
+      </div>
+    </section>
+
+    <!-- 2. Charts Section (5 Columns: 3 Trajectory / 2 Radar) -->
+    <section aria-label="Analytics Visualizations" class="dashboard-charts-grid">
+      <!-- Readiness Trajectory Area Chart -->
+      <div class="card chart-card-trajectory">
+        <div class="chart-header flex items-center justify-between">
+          <div>
+            <h2 class="chart-title">Readiness trajectory</h2>
+            <p class="chart-subtitle">Rolling monthly score across target roles.</p>
+          </div>
+          <span class="eyebrow-pill" style="font-family:var(--font-mono); font-size:0.7rem;">7 Months</span>
+        </div>
+
+        <div id="trajectory-chart-container" class="chart-svg-container">
+          <!-- Rendered via dashboard.js SVG engine -->
+        </div>
+      </div>
+
+      <!-- 6-Axis Skill Radar Spider Chart -->
+      <div class="card chart-card-radar">
+        <div class="chart-header flex items-center justify-between">
+          <div>
+            <h2 class="chart-title">Skill radar</h2>
+            <p class="chart-subtitle">You vs. target role median.</p>
+          </div>
+          <span class="eyebrow-pill" style="font-family:var(--font-mono); font-size:0.7rem;">6 Axes</span>
+        </div>
+
+        <div id="radar-chart-container" class="chart-svg-container">
+          <!-- Rendered via dashboard.js SVG engine -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Target Roles Section -->
+    <section aria-label="Target Role Benchmarks" style="margin-bottom: 3.5rem;">
+      <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
+        <div>
+          <span class="eyebrow-pill">Benchmarks</span>
+          <h2 style="font-family:var(--font-display); font-size:1.75rem; margin-top:0.35rem;">Target roles</h2>
+        </div>
+        <a href="roadmap.html" class="ink-underline" style="font-size:0.875rem; font-weight:500;">
+          All roadmaps &rarr;
+        </a>
+      </div>
+
+      <div id="target-roles-container" class="target-roles-grid">
+        <!-- Dynamically populated from backend roles via dashboard.js -->
+        <div class="card"><p>Loading role profiles…</p></div>
+      </div>
+    </section>
+
+    <!-- 4. Quick Action Navigation Cards -->
+    <section aria-label="Quick Actions" class="quick-nav-grid">
+      <a href="#resume-section" class="card quick-nav-card">
+        <div>
+          <div class="quick-nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+          </div>
+          <h3 class="quick-nav-title">Parse resume</h3>
+          <p class="quick-nav-sub">Extract technical skills and metadata in memory.</p>
+        </div>
+        <div class="quick-nav-footer">
+          <span>Upload document</span>
+          <span class="quick-nav-arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <a href="#job-section" class="card quick-nav-card">
+        <div>
+          <div class="quick-nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <h3 class="quick-nav-title">Match a job</h3>
+          <p class="quick-nav-sub">Score any job description for required vs. preferred skills.</p>
+        </div>
+        <div class="quick-nav-footer">
+          <span>Compare alignment</span>
+          <span class="quick-nav-arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <a href="roadmap.html" class="card quick-nav-card">
+        <div>
+          <div class="quick-nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+          </div>
+          <h3 class="quick-nav-title">6-week roadmap</h3>
+          <p class="quick-nav-sub">Actionable checklist ordered by foundational prerequisites.</p>
+        </div>
+        <div class="quick-nav-footer">
+          <span>Track milestones</span>
+          <span class="quick-nav-arrow">&rarr;</span>
+        </div>
+      </a>
+    </section>
+
+    <!-- 5. Interactive Tool: Resume Ingestion -->
+    <section id="resume-section" class="interactive-tool-section section-anchor">
+      <div style="margin-bottom: 1.5rem;">
+        <span class="eyebrow-pill">Ingest</span>
+        <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Feed the graph.</h2>
+        <p style="color:var(--muted-foreground); margin-top:0.35rem;">
+          Drop your PDF or DOCX resume. We extract skills, tools, and technical competencies in memory.
+        </p>
+      </div>
+
+      <div class="card" style="padding: 2.5rem; text-align: center;">
+        <div id="resume-drop-zone" class="card-dashed" style="padding: 3rem 1.5rem; cursor: pointer; transition: var(--transition-smooth);">
+          <div style="width: 3.5rem; height: 3.5rem; border-radius: var(--radius-full); background: var(--foreground); color: var(--background); display: grid; place-items: center; margin: 0 auto 1.25rem;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <h3 style="font-family:var(--font-display); font-size:1.35rem; margin-bottom:0.35rem;">Drop your resume here</h3>
+          <p style="font-size:0.875rem; color:var(--muted-foreground); margin-bottom:1rem;">
+            PDF or DOCX &bull; Maximum 5 MB &bull; In-memory text extraction
+          </p>
+          <span id="resume-filename" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--foreground);"></span>
+          <input type="file" id="resume-file-input" accept=".pdf,.docx" class="hidden" aria-label="Upload resume file" />
+        </div>
+
+        <div class="flex items-center justify-center gap-3" style="margin-top: 1.5rem;">
+          <button id="resume-parse-btn" class="btn btn-primary btn-lg" type="button" disabled>
+            Parse resume
+          </button>
+        </div>
+
+        <div id="resume-results" class="hidden" style="margin-top: 1.5rem; text-align: left;"></div>
+      </div>
+    </section>
+
+    <!-- 6. Interactive Tool: Job Description Matcher -->
+    <section id="job-section" class="interactive-tool-section section-anchor">
+      <div style="margin-bottom: 1.5rem;">
+        <span class="eyebrow-pill">Match</span>
+        <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Score any job description.</h2>
+        <p style="color:var(--muted-foreground); margin-top:0.35rem;">
+          Paste a target job posting. We parse technical requirements and evaluate alignment against your profile.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="form-group">
+          <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+            <label class="form-label" for="jd-textarea">Job Description Text</label>
+            <span id="jd-char-counter" style="font-family:var(--font-mono); font-size:0.75rem; color:var(--muted-foreground);">0 chars</span>
+          </div>
+          <textarea
+            id="jd-textarea"
+            class="form-textarea"
+            placeholder="Paste complete job description text here (e.g. Senior Harness Engineer at Anthropic. Required: Python, Docker, PyTorch, evaluation pipelines...)"
+            rows="6"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="jd-match-btn" class="btn btn-primary" type="button" disabled>
+            Score job description &rarr;
+          </button>
+        </div>
+
+        <div id="jd-results-container" class="hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-container">
+      <div class="footer-copy">
+        &copy; <span id="footer-year">2026</span> SkillGraph AI &bull; Paper &amp; Ink edition
+      </div>
+      <div class="footer-links">
+        <a href="index.html" class="ink-underline">Overview</a>
+        <a href="roadmap.html" class="ink-underline">Roadmap</a>
+        <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener noreferrer" class="ink-underline">API Docs &nearr;</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
+
