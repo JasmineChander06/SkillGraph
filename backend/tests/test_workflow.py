@@ -10,6 +10,7 @@ Tests:
 from __future__ import annotations
 
 import io
+import pymupdf
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -18,6 +19,16 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db, init_db
 from app.main import app
+
+
+def create_test_pdf(text: str) -> bytes:
+    """Generate a clean in-memory PDF containing the specified text."""
+    doc = pymupdf.open()
+    page = doc.new_page()
+    page.insert_text((50, 72), text)
+    content = doc.tobytes()
+    doc.close()
+    return content
 
 
 @pytest.fixture
@@ -359,3 +370,143 @@ class TestResumePrivacyAndOwnership:
             "/api/resume/records/9999",
             headers={"Authorization": f"Bearer {token_a}"},
         ).status_code == 404
+
+    def test_authenticated_resume_upload_and_idor(self, workflow_client):
+        """Uploading a resume while authenticated persists record; verifies IDOR and deletion."""
+        token_a = register_and_get_token(workflow_client, "alice.pdf@example.com", "Alice")
+        token_b = register_and_get_token(workflow_client, "bob.pdf@example.com", "Bob")
+
+        pdf_bytes = create_test_pdf(
+            "Alice Resume: Experienced Python and FastAPI developer with PostgreSQL skills."
+        )
+
+        # Alice uploads and parses resume with auth header
+        res = workflow_client.post(
+            "/api/resume/parse",
+            files={"file": ("resume.pdf", io.BytesIO(pdf_bytes), "application/pdf")},
+            headers={"Authorization": f"Bearer {token_a}"},
+        )
+        assert res.status_code == 200
+        assert res.json()["success"] is True
+
+        # Alice retrieves her resume records
+        alice_records = workflow_client.get(
+            "/api/resume/records",
+            headers={"Authorization": f"Bearer {token_a}"},
+        ).json()
+        assert len(alice_records) == 1
+        record_id = alice_records[0]["id"]
+        assert alice_records[0]["filename"] == "resume.pdf"
+
+        # Alice views record detail
+        detail = workflow_client.get(
+            f"/api/resume/records/{record_id}",
+            headers={"Authorization": f"Bearer {token_a}"},
+        ).json()
+        assert detail["id"] == record_id
+        assert "FastAPI" in detail["extracted_text"]
+
+        # Bob tries to view Alice's resume -> 403 Forbidden
+        bob_view = workflow_client.get(
+            f"/api/resume/records/{record_id}",
+            headers={"Authorization": f"Bearer {token_b}"},
+        )
+        assert bob_view.status_code == 403
+
+        # Bob tries to delete Alice's resume -> 403 Forbidden
+        bob_del = workflow_client.delete(
+            f"/api/resume/records/{record_id}",
+            headers={"Authorization": f"Bearer {token_b}"},
+        )
+        assert bob_del.status_code == 403
+
+        # Alice deletes her resume
+        alice_del = workflow_client.delete(
+            f"/api/resume/records/{record_id}",
+            headers={"Authorization": f"Bearer {token_a}"},
+        )
+        assert alice_del.status_code == 200
+        assert alice_del.json()["ok"] is True
+
+        # Verify record no longer exists
+        assert workflow_client.get(
+            f"/api/resume/records/{record_id}",
+            headers={"Authorization": f"Bearer {token_a}"},
+        ).status_code == 404
+
+
+class TestResourceLifecycleAndEdgeCases:
+    """Tests for resource deletion, direct patch, query parameter status, and error responses."""
+
+    def test_delete_skill_analysis_by_owner(self, workflow_client):
+        """Owner can successfully delete their skill analysis."""
+        token = register_and_get_token(workflow_client, "owner.skill@example.com", "Owner")
+        auth_h = {"Authorization": f"Bearer {token}"}
+
+        workflow_client.post(
+            "/api/skills/analyze",
+            json={"text": "Python Docker", "role_id": "backend-engineer"},
+            headers=auth_h,
+        )
+        analyses = workflow_client.get("/api/skills/analyses", headers=auth_h).json()
+        assert len(analyses) == 1
+        analysis_id = analyses[0]["id"]
+
+        del_res = workflow_client.delete(f"/api/skills/analyses/{analysis_id}", headers=auth_h)
+        assert del_res.status_code == 200
+        assert del_res.json()["ok"] is True
+
+        # Ensure deleted
+        assert workflow_client.get(f"/api/skills/analyses/{analysis_id}", headers=auth_h).status_code == 404
+
+    def test_delete_job_analysis_by_owner(self, workflow_client):
+        """Owner can successfully delete their job description analysis."""
+        token = register_and_get_token(workflow_client, "owner.jd@example.com", "Owner")
+        auth_h = {"Authorization": f"Bearer {token}"}
+
+        workflow_client.post(
+            "/api/job-descriptions/analyze",
+            json={"resume_text": "Python", "job_description_text": "Python and Redis needed."},
+            headers=auth_h,
+        )
+        analyses = workflow_client.get("/api/job-descriptions/analyses", headers=auth_h).json()
+        assert len(analyses) == 1
+        analysis_id = analyses[0]["id"]
+
+        del_res = workflow_client.delete(f"/api/job-descriptions/analyses/{analysis_id}", headers=auth_h)
+        assert del_res.status_code == 200
+        assert del_res.json()["ok"] is True
+
+        # Ensure deleted
+        assert workflow_client.get(f"/api/job-descriptions/analyses/{analysis_id}", headers=auth_h).status_code == 404
+
+    def test_direct_task_patch_and_mismatched_roadmap(self, workflow_client):
+        """Test patching task directly via /api/roadmaps/tasks/{id} and reject roadmap mismatch."""
+        token = register_and_get_token(workflow_client, "task.patch@example.com", "Patcher")
+        auth_h = {"Authorization": f"Bearer {token}"}
+
+        workflow_client.post(
+            "/api/roadmaps/generate",
+            json={"role_id": "backend-engineer"},
+            headers=auth_h,
+        )
+        roadmap = workflow_client.get("/api/roadmaps", headers=auth_h).json()[0]
+        roadmap_detail = workflow_client.get(f"/api/roadmaps/{roadmap['id']}", headers=auth_h).json()
+        task_id = roadmap_detail["tasks"][0]["id"]
+
+        # Patch directly using query param ?done=true
+        direct_patch = workflow_client.patch(
+            f"/api/roadmaps/tasks/{task_id}?done=true",
+            headers=auth_h,
+        )
+        assert direct_patch.status_code == 200
+        assert direct_patch.json()["status"] == "completed"
+
+        # Patch with mismatched roadmap_id -> 400 Bad Request
+        mismatch_res = workflow_client.patch(
+            f"/api/roadmaps/999999/tasks/{task_id}",
+            json={"status": "pending"},
+            headers=auth_h,
+        )
+        assert mismatch_res.status_code == 400
+        assert "does not belong to roadmap" in mismatch_res.json()["detail"].lower()
