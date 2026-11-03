@@ -8,3 +8,5 @@ pytest>=8.0.0
 pymupdf>=2.0.0
 python-docx>=1.0.0
 python-multipart>=0.0.12
+sqlalchemy>=2.0.0
+pyjwt[crypto]>=2.8.0

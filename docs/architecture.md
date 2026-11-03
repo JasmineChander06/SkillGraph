@@ -387,97 +387,79 @@ The FastAPI backend implements the exact REST contracts expected by the frontend
 
 ### 7.1 Authentication Endpoints
 
-* **`POST /auth/signup`**
-  * Request: `{ "email": "user@example.com", "password": "...", "name": "Jane Doe" }`
-  * Response: `{ "token": "jwt_token_string", "user": { "id": "...", "email": "...", "name": "..." } }`
-* **`POST /auth/login`**
+* **`POST /api/auth/register`** (Alias: `POST /auth/signup`)
+  * Request: `{ "email": "user@example.com", "password": "...", "full_name": "Jane Doe" }`
+  * Response: `{ "access_token": "...", "token": "...", "token_type": "bearer", "expires_in_minutes": 30, "user": { "id": 1, "email": "...", "full_name": "..." } }`
+* **`POST /api/auth/login`** (Alias: `POST /auth/login`)
   * Request: `{ "email": "user@example.com", "password": "..." }`
-  * Response: `{ "token": "jwt_token_string", "user": { ... } }`
-
-### 7.2 Resume Parsing
-
-* **`POST /resume/upload`**
-  * Content-Type: `multipart/form-data`
-  * Request: `file: UploadFile` (PDF, DOCX, TXT up to 5MB)
+  * Response: `{ "access_token": "...", "token": "...", "token_type": "bearer", "expires_in_minutes": 30, "user": { ... } }`
+* **`GET /api/auth/me`** (Alias: `GET /auth/me`)
   * Headers: `Authorization: Bearer <token>`
+  * Response: `{ "id": 1, "email": "user@example.com", "full_name": "Jane Doe", "is_active": true, "created_at": "..." }`
+
+### 7.2 Resume Parsing & Records
+
+* **`POST /api/resume/parse`** (Alias: `POST /resume/upload`)
+  * Content-Type: `multipart/form-data`
+  * Request: `file: UploadFile` (PDF or DOCX up to 5MB)
+  * Headers: `Authorization: Bearer <token>` (optional; persists record if authenticated)
   * Response:
     ```json
     {
-      "skills": [
-        { "name": "Python", "level": 82, "category": "Language" },
-        { "name": "FastAPI", "level": 71, "category": "Backend" }
-      ],
-      "filename": "resume.pdf",
-      "extracted_count": 10
+      "success": true,
+      "message": "Resume parsed successfully.",
+      "text": "...",
+      "metadata": {
+        "filename": "resume.pdf",
+        "file_type": "pdf",
+        "file_size_bytes": 10240,
+        "word_count": 450,
+        "character_count": 2800,
+        "requires_ocr": false,
+        "is_empty_or_whitespace": false
+      }
     }
     ```
+* **`GET /api/resume/records`**: List active resume records for the authenticated user.
+* **`GET /api/resume/records/{record_id}`**: Retrieve specific resume record with strict ownership checks (IDOR protected).
+* **`DELETE /api/resume/records/{record_id}`**: Delete a resume record owned by the authenticated user.
 
 ### 7.3 Skills & Gap Analysis
 
-* **`GET /skills/`**
-  * Response: Array of `Skill` objects:
-    ```json
-    [
-      { "name": "Python", "level": 82, "category": "Language" },
-      { "name": "TypeScript", "level": 74, "category": "Language" }
-    ]
-    ```
-* **`GET /skills/gap?role={role_name}`**
-  * Parameters: `role` (string query param, e.g. `ML Engineer`)
-  * Response:
-    ```json
-    {
-      "role": "ML Engineer",
-      "readiness": 71,
-      "missing": ["MLOps", "PyTorch", "Kubernetes", "Airflow"],
-      "present": [
-        { "name": "Python", "level": 82, "category": "Language" },
-        { "name": "spaCy", "level": 62, "category": "ML" }
-      ]
-    }
-    ```
+* **`POST /api/skills/analyze`**
+  * Request: `{ "text": "Extracted resume plain text...", "role_id": "harness-engineer" }`
+  * Headers: `Authorization: Bearer <token>` (optional; persists analysis if authenticated)
+  * Response: `AnalysisResult` (matched skills, missing skills, uncertain skills, priority gaps, coverage percentage).
+* **`GET /api/skills/analyses`**: List past skill-gap analyses for the authenticated user.
+* **`GET /api/skills/analyses/{analysis_id}`**: Retrieve specific analysis with strict ownership verification.
+* **`DELETE /api/skills/analyses/{analysis_id}`**: Delete specific analysis owned by the user.
+* **`GET /skills/`** and **`GET /skills/gap?role={role}`**: Backward-compatibility endpoints.
 
 ### 7.4 Job Description Matching
 
-* **`POST /jobs/match`**
-  * Request: `{ "jd": "Job description text..." }`
-  * Response:
-    ```json
-    {
-      "role": "Senior Backend Engineer @ Acme",
-      "overall": 82,
-      "breakdown": [
-        { "area": "Core language", "score": 92 },
-        { "area": "Frameworks", "score": 84 },
-        { "area": "Data stores", "score": 78 },
-        { "area": "Infra / DevOps", "score": 61 },
-        { "area": "System design", "score": 55 }
-      ],
-      "matched": ["Python", "FastAPI", "PostgreSQL", "Redis", "REST"],
-      "missing": ["Kafka", "gRPC", "Terraform"]
-    }
-    ```
+* **`POST /api/job-descriptions/analyze`** (Alias: `POST /jobs/match`)
+  * Request: `{ "resume_text": "...", "job_description_text": "..." }`
+  * Headers: `Authorization: Bearer <token>` (optional; persists analysis if authenticated)
+  * Response: `JobDescriptionAnalysisResult` (extracted skills, matched skills, missing skills, required vs preferred, experience requirements, coverage percentage).
+* **`GET /api/job-descriptions/analyses`**: List user's job description comparisons.
+* **`GET /api/job-descriptions/analyses/{analysis_id}`**: Retrieve specific job description analysis with ownership check.
+* **`DELETE /api/job-descriptions/analyses/{analysis_id}`**: Delete specific job description analysis.
 
 ### 7.5 Roadmap & Progress Tracking
 
-* **`GET /roadmap/`**
-  * Response: Array of roadmap checklist items:
-    ```json
-    [
-      {
-        "id": "task-uuid-1",
-        "week": 1,
-        "focus": "Foundations",
-        "item": "Refresh Python typing + async",
-        "done": true
-      }
-    ]
-    ```
-* **`PATCH /roadmap/{task_id}?done={bool}`**
-  * Response: `{ "ok": true }`
-* **`POST /roadmap/generate`**
-  * Request: `{ "goal": "ML Engineer" }`
-  * Response: `{ "ok": true, "generated_tasks": 18 }`
+* **`POST /api/roadmaps/generate`** (Alias: `POST /roadmap/generate`)
+  * Request: `{ "role_id": "harness-engineer", "existing_skills": [], "weekly_hours": 10, "resume_text": "..." }`
+  * Headers: `Authorization: Bearer <token>` (optional; persists roadmap, tasks, and initial progress if authenticated)
+  * Response: `Roadmap` (6-week plan, ordered tasks with prerequisites and validated learning resources, capstone project).
+* **`GET /api/roadmaps`**: List user's generated roadmaps with completion stats.
+* **`GET /api/roadmaps/{roadmap_id}`**: Retrieve roadmap detail and tasks (strict ownership check).
+* **`DELETE /api/roadmaps/{roadmap_id}`**: Delete roadmap and cascading tasks.
+* **`PATCH /api/roadmaps/{roadmap_id}/tasks/{task_id}`** (Alias: `PATCH /roadmap/{task_id}`):
+  * Request: `{ "status": "completed" }` or `{ "done": true }` or query parameter `?done=true`
+  * Enforces ownership check: verifies the task belongs to a roadmap owned by the authenticated caller.
+  * Updates task status and updates/creates user's `TaskProgressRecord`.
+* **`GET /api/progress`**:
+  * Response: `ProgressSummaryResponse` with total tasks, completed, in-progress, pending, completion percentage, and active roadmap tasks list.
 
 ### 7.6 GitHub Analysis
 

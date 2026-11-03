@@ -45,6 +45,14 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     PORT: int = 8000
 
+    # Database Configuration (Phase 6)
+    DATABASE_URL: str = "sqlite:///./skillgraph.db"
+
+    # Authentication Configuration (Phase 7)
+    SECRET_KEY: str = "CHANGE-ME-IN-PRODUCTION-use-a-cryptographically-secure-random-key"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_ALGORITHM: str = "HS256"
+
     # Resume Upload Configuration (Phase 2)
     MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
     MIN_TEXT_LENGTH_THRESHOLD: int = 30  # Minimum non-whitespace characters
