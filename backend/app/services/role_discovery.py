@@ -423,3 +423,4 @@ def compare_roles(role_a_id: str, role_b_id: str) -> Dict[str, Any]:
             "estimated_hours": hours_b_to_a,
         },
     }
+

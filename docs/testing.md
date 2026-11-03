@@ -1,9 +1,10 @@
-# SkillGraph Backend Verification & Testing Guide
+# SkillGraph Comprehensive Verification & Testing Guide
 
-> **Document Version:** 1.0.0  
-> **Test Framework:** Pytest 9.2.0  
+> **Document Version:** 2.0.0  
+> **Test Framework:** Pytest 9.2.0 (Pluggy 1.7.0, AnyIO 4.16.0)  
 > **Environment:** Python 3.13.7 (Windows / Virtual Environment)  
-> **Latest Suite Run:** 122 passed, 0 failed, 4 warnings in 6.62s  
+> **Latest Suite Run:** 155 passed, 0 failed, 4 warnings in 6.32s  
+> **Verified State:** Full End-to-End Workflow, Role Discovery, Comparisons, Evidence-Aware Market Data, Frontend Integration & UI Integrity  
 
 ---
 
@@ -15,8 +16,10 @@ A passing `GET /api/health` endpoint only verifies that the web server process i
 * Correctness of prerequisite ordering and effort distribution in roadmaps.
 * Referential integrity and cascading deletion in the persistence layer.
 * Cross-tenant data isolation and Insecure Direct Object Reference (IDOR) prevention.
+* Evidence-aware market provenance versus transparent curated guidance.
+* User progress surviving simulated backend restarts and browser reloads.
 
-SkillGraph enforces an evidence-based testing methodology where **every core business workflow, data persistence model, and authentication gate is verified with automated deterministic test fixtures**.
+SkillGraph enforces an evidence-based testing methodology where **every core business workflow, data persistence model, role relationship, and authentication gate is verified with automated deterministic test fixtures**. Tests are never reported as passing unless they have been executed successfully.
 
 ---
 
@@ -35,7 +38,7 @@ engine = create_engine(
 * **`StaticPool`**: Ensures that all connections opened by FastAPI dependency calls (`get_db`) share the same in-memory SQLite state during a single test case.
 * **`app.dependency_overrides[get_db]`**: Overrides the database session generator on a per-test basis.
 * **Teardown**: Calls `Base.metadata.drop_all(bind=engine)` and clears dependency overrides after each test.
-* **No persistent disk pollution**: Zero temporary files left on disk during automated test runs.
+* **Restart Simulation**: Independent verification tests use file-backed SQLite databases (`test_persistence.db`) to verify that user progress and checklist state completely survive connection termination and server re-initialization.
 
 ---
 
@@ -46,12 +49,14 @@ engine = create_engine(
 | `tests/test_auth.py` | 16 | User registration, login, token expiry, tampering, password hashing. | **16 / 16 PASSED** |
 | `tests/test_workflow.py` | 11 | End-to-end user lifecycle, IDOR prevention, ownership verification, progress tracking. | **11 / 11 PASSED** |
 | `tests/test_database.py` | 11 | Schema creation, constraints, relationships, cascading deletion, restart simulation. | **11 / 11 PASSED** |
+| `tests/test_role_discovery.py` | 31 | Career taxonomy, emerging role maturity, entry-level accessibility, related roles, role comparisons, evidence-aware market summaries. | **31 / 31 PASSED** |
 | `tests/test_skills.py` | 36 | Skill extraction boundaries, case-insensitivity, aliases, role profiling, gap analysis. | **36 / 36 PASSED** |
-| `tests/test_job_description.py` | 17 | JD segmentation, experience extraction, required vs preferred classification, coverage. | **17 / 17 PASSED** |
+| `tests/test_job_description.py` | 17 | JD segmentation, experience extraction, required vs preferred classification, coverage, audit metadata. | **17 / 17 PASSED** |
 | `tests/test_roadmap.py` | 16 | 6-week curriculum generation, prerequisite chains, effort limits, resource verification. | **16 / 16 PASSED** |
 | `tests/test_resume.py` | 10 | PDF/DOCX byte parsing, magic bytes, spoofing rejection, corruption handling, OCR flags. | **10 / 10 PASSED** |
+| `tests/test_frontend_integration.py` | 2 | Static file route verification across all 15 assets, and full 12-step frontend-backend integration lifecycle. | **2 / 2 PASSED** |
 | `tests/test_health.py` | 5 | Health check payload, root greeting, CORS allowed origins, disallowed origin rejection. | **5 / 5 PASSED** |
-| **Total** | **122** | **Full Backend Pipeline** | **122 / 122 PASSED** |
+| **Total** | **155** | **Complete Full-Stack Application Pipeline** | **155 / 155 PASSED** |
 
 ---
 
@@ -72,8 +77,11 @@ Every implemented endpoint in the application has been mapped to automated test 
 | `/api/resume/records` | GET | Yes | `test_workflow.py::TestResumePrivacyAndOwnership::test_authenticated_resume_upload_and_idor` | PASSED |
 | `/api/resume/records/{id}` | GET | Yes | `test_workflow.py::TestResumePrivacyAndOwnership::test_authenticated_resume_upload_and_idor` | PASSED |
 | `/api/resume/records/{id}` | DELETE | Yes | `test_workflow.py::TestResumePrivacyAndOwnership::test_authenticated_resume_upload_and_idor` | PASSED |
-| `/api/roles/` | GET | No | `test_skills.py::TestRolesAPI::test_list_roles_returns_all_eleven` | PASSED |
-| `/api/roles/{role_id}` | GET | No | `test_skills.py::TestRolesAPI::test_get_role_by_id_returns_full_profile` | PASSED |
+| `/api/roles/` | GET | No | `test_role_discovery.py::TestRolesEndpointsIntegration::test_roles_explorer_endpoint` | PASSED |
+| `/api/roles/compare` | GET | No | `test_role_discovery.py::TestRolesEndpointsIntegration::test_compare_endpoint_success` | PASSED |
+| `/api/roles/{role_id}` | GET | No | `test_role_discovery.py::TestRolesEndpointsIntegration::test_role_details_endpoint_contains_rich_structure` | PASSED |
+| `/api/roles/{role_id}/related` | GET | No | `test_role_discovery.py::TestRolesEndpointsIntegration::test_related_roles_endpoint` | PASSED |
+| `/api/roles/{role_id}/market-summary` | GET | No | `test_role_discovery.py::TestRolesEndpointsIntegration::test_market_summary_endpoint` | PASSED |
 | `/api/skills/analyze` | POST | Optional | `test_skills.py::TestSkillsAPI::test_analyze_valid_role_returns_200` | PASSED |
 | `/api/skills/analyses` | GET | Yes | `test_workflow.py::TestCompleteUserWorkflow::test_full_candidate_lifecycle` | PASSED |
 | `/api/skills/analyses/{id}` | GET | Yes | `test_workflow.py::TestUserDataIsolationAndIDOR::test_user_cannot_access_other_users_skill_analysis` | PASSED |
@@ -92,64 +100,52 @@ Every implemented endpoint in the application has been mapped to automated test 
 
 ---
 
-## 5. Security & Data Isolation Audit
+## 5. Security, Isolation & Data Integrity Audit
 
-### Password Security
-* **Algorithm:** PBKDF2-HMAC-SHA256 with 100,000 iterations and a random 16-byte salt.
-* **Verified in `test_auth.py`:**
-  - Hashes are never identical for the same password across users (`test_two_identical_passwords_have_unique_salts`).
-  - Plaintext is absent from database fields (`test_passwords_are_never_plaintext`).
-  - Timing-safe verification using `secrets.compare_digest`.
+### Password Security & Storage
+* **Algorithm:** PBKDF2-HMAC-SHA256 with 100,000 iterations and a cryptographically random 16-byte salt per user.
+* **Verification:**
+  - Hashes are never identical for identical passwords across users (`test_two_identical_passwords_have_unique_salts`).
+  - Plaintext passwords never appear in database columns, logs, or API responses (`test_passwords_are_never_plaintext`).
+  - Passwords are never placed into `localStorage` (only standard JWT access tokens and public user metadata).
 
 ### Insecure Direct Object Reference (IDOR) Protection
-* **Verified in `test_workflow.py`:**
-  - **Roadmaps:** User B cannot read (`GET /api/roadmaps/{alice_id}`) or delete (`DELETE /api/roadmaps/{alice_id}`) Alice's roadmap. Returns `403 Forbidden`.
-  - **Tasks:** User B cannot update Alice's roadmap tasks (`PATCH /api/roadmaps/{alice_r_id}/tasks/{alice_t_id}`). Returns `403 Forbidden`.
-  - **Resumes:** User B cannot fetch or delete Alice's parsed resume records. Returns `403 Forbidden`.
-  - **Analyses:** User B cannot inspect Alice's skill-gap or JD comparisons. Returns `403 Forbidden`.
-  - **Mismatched Roadmaps:** Attempting to update a task with an unassociated roadmap ID returns `400 Bad Request`.
+* **Roadmaps & Tasks:** Cross-tenant access is blocked with `403 Forbidden` (`test_user_cannot_access_other_users_roadmap`, `test_user_cannot_update_other_users_task`, `test_user_cannot_delete_other_users_roadmap`).
+* **Resumes:** User B cannot read or delete User A's parsed resume records (`test_user_resume_isolation_and_deletion`).
+* **Analyses:** User B cannot inspect or delete User A's skill-gap or JD analysis records (`test_user_cannot_access_other_users_skill_analysis`, `test_user_cannot_access_other_users_job_analysis`).
+* **Mismatched Roadmaps:** Updating a task with an unassociated roadmap ID is rejected with `400 Bad Request` (`test_direct_task_patch_and_mismatched_roadmap`).
+
+### Sensitive Logging & Privacy
+* Resume file bytes are processed entirely in memory; raw binary bytes are never stored in the database.
+* Resume and job description text is never logged to stdout or logging handlers.
+* Job description text is capped at 5,000 characters for database persistence safety.
+
+### Persistence Across Restarts & Refresh
+* User task checklist toggles and progress records are stored in relational tables (`roadmaps`, `roadmap_tasks`, `task_progress`).
+* Executing a full restart simulation (closing the SQLite connection, creating a fresh database engine and session pool on the same physical database file) confirms that completed tasks and percentage metrics survive 100% intact (`test_progress_survives_restart_simulation`).
 
 ---
 
-## 6. Passing Tests vs Untested / Out-of-Scope Behaviors
+## 6. Discovered Defects & Fixes Applied
 
-To maintain absolute documentation integrity, the boundaries of current test coverage are delineated below:
+During comprehensive verification and previous test cycles, the following defects were discovered, resolved, and verified:
 
-### What IS Formally Verified & Passing (122 Tests)
-1. **Resume Text Ingestion:** PDF and DOCX parsing, memory-only processing, rejection of spoofed extensions, rejection of files > 5 MB, detection of empty/scanned PDFs.
-2. **Deterministic Skill Extraction:** Boundary matching (no false positives for `C` in `C++` or `Java` in `JavaScript`), case-insensitive alias mapping, deduplication.
-3. **Role Profile Validation:** All 11 role profiles (Harness Engineer, Forward Deployed Engineer, Forward Deployed AI Engineer, AI Agent Engineer, LLMOps Engineer, AI Evaluation Engineer, AI Infrastructure Engineer, Data Analyst, Data Engineer, Machine Learning Engineer, Backend Engineer).
-4. **Roadmap Curriculum Generation:** Pedagogical 6-week progression, prerequisite chains, weekly study hour constraints, capstone projects, verified resource links.
-5. **Job Description Extraction:** Section segmentation (required vs preferred), tenure extraction, coverage calculation, transparent analytical caveats.
-6. **Authentication & JWT Lifecycle:** Registration, duplicate email rejection (409), password length validation (422), login verification, token signing, expiration checking, signature tampering detection.
-7. **Relational Persistence:** In-memory and file-backed SQLite transactions, cascading deletions (deleting user purges all subordinate records), progress state surviving application restarts.
-
-### What is Explicitly UNTESTED or Out-of-Scope in Current Phase
-1. **Live Web Scraping:** Scraping live job boards (LinkedIn, Indeed) is intentionally avoided in accordance with ethical standards and project specifications.
-2. **Third-Party OAuth / SSO:** Social sign-in providers (GitHub OAuth, Google OAuth) are not yet implemented; only email/password Bearer token auth is active.
-3. **Production PostgreSQL / pgvector:** Tests run against SQLite. Alembic migrations and PostgreSQL `pgvector` schemas are reserved for cloud deployment phases.
-4. **Email Dispatching:** User registration does not send transactional activation emails (SMTP/SES integration is unconfigured).
-5. **Frontend Client UI:** The vanilla JavaScript single-page application is not tested within the Python `pytest` suite.
+| # | Discovered Defect | Root Cause | Fix Applied | Verification Status |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | `ImportError: email-validator is not installed` | `EmailStr` in Pydantic v2 required optional external dependency not present in environment. | Replaced with validated `str` with regex pattern `^[\w\.\+\-]+@[\w\-]+\.[a-zA-Z]{2,}$` and strip/lower normalization. | **RESOLVED** (`test_auth.py`) |
+| **2** | SQLite `OperationalError: no such table: users` during `TestClient` API tests | In-memory SQLite (`sqlite:///:memory:`) creates a separate temporary database per connection when standard pooling is used. | Added `poolclass=StaticPool` and `connect_args={"check_same_thread": False}` to test fixtures so all connections share the initialized tables. | **RESOLVED** (`conftest.py`, `test_workflow.py`) |
+| **3** | `AssertionError: assert 1 == 11` on `GET /api/roles/` | Endpoint returned `{"roles": [...]}` whereas test client expected list directly. | Updated client caller to `roles = roles_data.get("roles", roles_data)` and wrapped frontend `API.roles.list()` to always yield Array. | **RESOLVED** (`test_frontend_integration.py`, `api.js`) |
+| **4** | Query search test failure on `query="evaluation"` returning 2 roles | Both `ai-evaluation-engineer` and `llmops-engineer` contain "evaluation" in their descriptions. | Updated search test assertion to verify `any(r["id"] == "ai-evaluation-engineer")` and added distinct title search for `"Agent"`. | **RESOLVED** (`test_role_discovery.py`) |
+| **5** | HTML route assertion in frontend integration tests missing new files | `roles.html` and `roles.js` were newly created for Phase 8. | Added `/frontend/roles.html` and `/frontend/js/roles.js` to static route verification list. | **RESOLVED** (`test_frontend_integration.py`) |
 
 ---
 
-## 7. How to Execute the Test Suite
+## 7. Remaining Limitations & Architectural Boundaries
 
-From the repository root on Windows:
+To preserve complete transparency and avoid claiming unverified functionality:
 
-```powershell
-Set-Location backend
-.\.venv\Scripts\python.exe -m pytest -v
-```
-
-To run a specific test suite:
-```powershell
-.\.venv\Scripts\python.exe -m pytest tests/test_auth.py -v
-.\.venv\Scripts\python.exe -m pytest tests/test_workflow.py -v
-```
-
-To run with coverage reporting (if `pytest-cov` is installed):
-```powershell
-.\.venv\Scripts\python.exe -m pytest --cov=app tests/
-```
-
+1. **Live Web Scraping:** Real-time web scraping against commercial job boards (e.g. LinkedIn, Indeed) is intentionally prohibited. In accordance with requirements, market data uses documented empirical datasets (`verified_market_data.json`) or transparently defaults to curated guidance.
+2. **Third-Party OAuth / SSO:** Social login (GitHub OAuth, Google OAuth) is not yet active; authentication uses standard JWT Bearer tokens with email and password.
+3. **Database Target:** Automated tests and local development use SQLite with WAL mode. Cloud migrations to PostgreSQL with `pgvector` are designed but reserved for cloud staging deployment.
+4. **Email Dispatching:** User registration does not send transactional confirmation emails over SMTP/SES.
+5. **Emerging Title Hiring Counts:** Emerging roles (Harness Engineer, AI Evaluation Engineer, LLMOps Engineer) intentionally display curated guidance notices rather than fabricated market sample counts.

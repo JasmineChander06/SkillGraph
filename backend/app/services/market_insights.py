@@ -203,3 +203,4 @@ def calculate_market_summary_from_records(
             f"Source: {source_label} ({geography})."
         ),
     }
+
