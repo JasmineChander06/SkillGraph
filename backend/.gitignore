@@ -1,0 +1,27 @@
+# Backend specific gitignore
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Pytest / coverage cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local databases & uploads
+*.sqlite
+*.sqlite3
+*.db
+uploads/
+

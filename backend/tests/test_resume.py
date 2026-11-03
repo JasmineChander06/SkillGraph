@@ -2,7 +2,7 @@
 
 import io
 import docx
-import fitz
+import pymupdf
 from fastapi.testclient import TestClient
 
 from app.config import settings
@@ -13,7 +13,7 @@ client = TestClient(app)
 
 def create_sample_pdf(text: str) -> bytes:
     """Generate a clean in-memory PDF containing the specified text."""
-    doc = fitz.open()
+    doc = pymupdf.open()
     page = doc.new_page()
     page.insert_text((50, 72), text)
     content = doc.tobytes()
@@ -23,12 +23,12 @@ def create_sample_pdf(text: str) -> bytes:
 
 def create_scanned_image_pdf() -> bytes:
     """Generate a PDF containing only a raster image and no selectable text."""
-    doc = fitz.open()
+    doc = pymupdf.open()
     page = doc.new_page()
-    # Create a small RGB pixmap representing an image/scan
-    pix = fitz.Pixmap(fitz.csRGB, 120, 120, False)
+    # Create an RGB pixmap representing an image/scan (using modern PyMuPDF IRect)
+    pix = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, 120, 120), False)
     pix.clear_with(200)
-    page.insert_image(fitz.Rect(50, 50, 200, 200), pixmap=pix)
+    page.insert_image(pymupdf.Rect(50, 50, 200, 200), pixmap=pix)
     content = doc.tobytes()
     doc.close()
     return content
@@ -211,4 +211,3 @@ def test_reject_file_exceeding_max_size(monkeypatch):
 
     assert response.status_code == 413
     assert "exceeds the maximum allowed limit" in response.json()["detail"]
-

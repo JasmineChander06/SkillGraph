@@ -1,0 +1,590 @@
+{
+  "_comment": "Canonical skill ID → skill metadata with aliases, category, importance, prerequisites, and estimated learning effort.",
+  "skills": {
+    "python": {
+      "canonical": "Python",
+      "aliases": ["python3", "py", "python 3"],
+      "category": "Language",
+      "importance": "critical",
+      "prerequisites": [],
+      "estimated_hours": 120
+    },
+    "javascript": {
+      "canonical": "JavaScript",
+      "aliases": ["js", "ecmascript", "es6", "es2015", "es2020", "vanilla js", "vanilla javascript"],
+      "category": "Language",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 100
+    },
+    "typescript": {
+      "canonical": "TypeScript",
+      "aliases": ["ts", "typescript 4", "typescript 5"],
+      "category": "Language",
+      "importance": "high",
+      "prerequisites": ["javascript"],
+      "estimated_hours": 40
+    },
+    "go": {
+      "canonical": "Go",
+      "aliases": ["golang", "go lang"],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 80
+    },
+    "rust": {
+      "canonical": "Rust",
+      "aliases": ["rust lang", "rustlang"],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 200
+    },
+    "java": {
+      "canonical": "Java",
+      "aliases": ["java 8", "java 11", "java 17", "java 21", "jvm"],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 150
+    },
+    "cpp": {
+      "canonical": "C++",
+      "aliases": ["c++", "cplusplus", "c plus plus"],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 200
+    },
+    "c_lang": {
+      "canonical": "C",
+      "aliases": [],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 120
+    },
+    "sql": {
+      "canonical": "SQL",
+      "aliases": ["structured query language"],
+      "category": "Data",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 60
+    },
+    "bash": {
+      "canonical": "Bash",
+      "aliases": ["shell scripting", "shell script", "bash scripting", "sh", "zsh scripting"],
+      "category": "Language",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 30
+    },
+    "fastapi": {
+      "canonical": "FastAPI",
+      "aliases": ["fast api"],
+      "category": "Backend Framework",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 20
+    },
+    "django": {
+      "canonical": "Django",
+      "aliases": ["django rest framework", "drf", "django orm"],
+      "category": "Backend Framework",
+      "importance": "medium",
+      "prerequisites": ["python"],
+      "estimated_hours": 50
+    },
+    "flask": {
+      "canonical": "Flask",
+      "aliases": [],
+      "category": "Backend Framework",
+      "importance": "medium",
+      "prerequisites": ["python"],
+      "estimated_hours": 20
+    },
+    "react": {
+      "canonical": "React",
+      "aliases": ["reactjs", "react.js", "react js"],
+      "category": "Frontend Framework",
+      "importance": "medium",
+      "prerequisites": ["javascript"],
+      "estimated_hours": 80
+    },
+    "nextjs": {
+      "canonical": "Next.js",
+      "aliases": ["next js", "nextjs", "next.js"],
+      "category": "Frontend Framework",
+      "importance": "medium",
+      "prerequisites": ["react"],
+      "estimated_hours": 40
+    },
+    "postgresql": {
+      "canonical": "PostgreSQL",
+      "aliases": ["postgres", "pg", "psql"],
+      "category": "Database",
+      "importance": "high",
+      "prerequisites": ["sql"],
+      "estimated_hours": 40
+    },
+    "mysql": {
+      "canonical": "MySQL",
+      "aliases": ["my sql"],
+      "category": "Database",
+      "importance": "medium",
+      "prerequisites": ["sql"],
+      "estimated_hours": 30
+    },
+    "mongodb": {
+      "canonical": "MongoDB",
+      "aliases": ["mongo", "mongodb atlas"],
+      "category": "Database",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 30
+    },
+    "redis": {
+      "canonical": "Redis",
+      "aliases": ["redis cache", "redis pub/sub"],
+      "category": "Database",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "elasticsearch": {
+      "canonical": "Elasticsearch",
+      "aliases": ["elastic search", "elastic", "opensearch"],
+      "category": "Database",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 40
+    },
+    "docker": {
+      "canonical": "Docker",
+      "aliases": ["containers", "containerization", "dockerfile"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 30
+    },
+    "kubernetes": {
+      "canonical": "Kubernetes",
+      "aliases": ["k8s", "kube", "k8", "kubernetes cluster"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": ["docker"],
+      "estimated_hours": 60
+    },
+    "terraform": {
+      "canonical": "Terraform",
+      "aliases": ["tf", "hashicorp terraform"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 40
+    },
+    "github_actions": {
+      "canonical": "GitHub Actions",
+      "aliases": ["github ci", "gha", "github workflows"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": ["git"],
+      "estimated_hours": 20
+    },
+    "git": {
+      "canonical": "Git",
+      "aliases": ["version control", "source control"],
+      "category": "DevOps",
+      "importance": "critical",
+      "prerequisites": [],
+      "estimated_hours": 15
+    },
+    "aws": {
+      "canonical": "AWS",
+      "aliases": ["amazon web services", "amazon aws"],
+      "category": "Cloud",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 80
+    },
+    "gcp": {
+      "canonical": "GCP",
+      "aliases": ["google cloud platform", "google cloud"],
+      "category": "Cloud",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 60
+    },
+    "azure": {
+      "canonical": "Azure",
+      "aliases": ["microsoft azure", "azure cloud"],
+      "category": "Cloud",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 60
+    },
+    "pytorch": {
+      "canonical": "PyTorch",
+      "aliases": ["torch", "py torch"],
+      "category": "Machine Learning",
+      "importance": "high",
+      "prerequisites": ["python", "numpy"],
+      "estimated_hours": 80
+    },
+    "tensorflow": {
+      "canonical": "TensorFlow",
+      "aliases": ["tf", "tensor flow", "tensorflow 2"],
+      "category": "Machine Learning",
+      "importance": "medium",
+      "prerequisites": ["python", "numpy"],
+      "estimated_hours": 80
+    },
+    "scikit_learn": {
+      "canonical": "scikit-learn",
+      "aliases": ["sklearn", "scikit learn"],
+      "category": "Machine Learning",
+      "importance": "high",
+      "prerequisites": ["python", "numpy"],
+      "estimated_hours": 40
+    },
+    "numpy": {
+      "canonical": "NumPy",
+      "aliases": ["np", "numpy array"],
+      "category": "Data Science",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 20
+    },
+    "pandas": {
+      "canonical": "Pandas",
+      "aliases": ["pandas dataframe"],
+      "category": "Data Science",
+      "importance": "high",
+      "prerequisites": ["python", "numpy"],
+      "estimated_hours": 25
+    },
+    "spacy": {
+      "canonical": "spaCy",
+      "aliases": ["spacy", "spacy nlp"],
+      "category": "NLP",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 30
+    },
+    "huggingface": {
+      "canonical": "Hugging Face",
+      "aliases": ["huggingface", "hf", "hugging face transformers", "transformers library"],
+      "category": "Machine Learning",
+      "importance": "high",
+      "prerequisites": ["python", "pytorch"],
+      "estimated_hours": 40
+    },
+    "langchain": {
+      "canonical": "LangChain",
+      "aliases": ["lang chain"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 30
+    },
+    "llamaindex": {
+      "canonical": "LlamaIndex",
+      "aliases": ["llama index", "gpt index"],
+      "category": "LLM",
+      "importance": "medium",
+      "prerequisites": ["python"],
+      "estimated_hours": 25
+    },
+    "openai_api": {
+      "canonical": "OpenAI API",
+      "aliases": ["openai", "gpt api", "chatgpt api", "gpt-4 api", "gpt-3.5"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 15
+    },
+    "vector_db": {
+      "canonical": "Vector Databases",
+      "aliases": ["vector store", "vector db", "pinecone", "weaviate", "chroma", "qdrant", "pgvector", "faiss"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "rag": {
+      "canonical": "RAG",
+      "aliases": ["retrieval augmented generation", "retrieval-augmented generation"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": ["vector_db"],
+      "estimated_hours": 30
+    },
+    "prompt_engineering": {
+      "canonical": "Prompt Engineering",
+      "aliases": ["prompt design", "prompting", "prompt optimization"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": ["openai_api"],
+      "estimated_hours": 20
+    },
+    "mlflow": {
+      "canonical": "MLflow",
+      "aliases": ["ml flow"],
+      "category": "MLOps",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "airflow": {
+      "canonical": "Apache Airflow",
+      "aliases": ["airflow", "apache airflow", "airflow dags"],
+      "category": "Data Engineering",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 40
+    },
+    "spark": {
+      "canonical": "Apache Spark",
+      "aliases": ["spark", "pyspark", "databricks spark"],
+      "category": "Data Engineering",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 60
+    },
+    "dbt": {
+      "canonical": "dbt",
+      "aliases": ["data build tool", "dbt core", "dbt cloud"],
+      "category": "Data Engineering",
+      "importance": "high",
+      "prerequisites": ["sql"],
+      "estimated_hours": 30
+    },
+    "kafka": {
+      "canonical": "Apache Kafka",
+      "aliases": ["kafka", "kafka streams"],
+      "category": "Data Engineering",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 40
+    },
+    "grpc": {
+      "canonical": "gRPC",
+      "aliases": ["grpc", "protocol buffers", "protobuf"],
+      "category": "Backend",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "rest_api": {
+      "canonical": "REST API",
+      "aliases": ["restful api", "rest", "restful", "http api", "json api"],
+      "category": "Backend",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "graphql": {
+      "canonical": "GraphQL",
+      "aliases": ["graph ql"],
+      "category": "Backend",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 25
+    },
+    "system_design": {
+      "canonical": "System Design",
+      "aliases": ["distributed systems", "scalable architecture", "high availability design"],
+      "category": "Architecture",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 80
+    },
+    "microservices": {
+      "canonical": "Microservices",
+      "aliases": ["microservice architecture", "service-oriented architecture", "soa"],
+      "category": "Architecture",
+      "importance": "medium",
+      "prerequisites": ["docker"],
+      "estimated_hours": 40
+    },
+    "ci_cd": {
+      "canonical": "CI/CD",
+      "aliases": ["continuous integration", "continuous deployment", "continuous delivery", "cicd", "ci / cd"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": ["git"],
+      "estimated_hours": 30
+    },
+    "prometheus": {
+      "canonical": "Prometheus",
+      "aliases": ["prometheus monitoring"],
+      "category": "Observability",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 15
+    },
+    "grafana": {
+      "canonical": "Grafana",
+      "aliases": [],
+      "category": "Observability",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 10
+    },
+    "observability": {
+      "canonical": "Observability",
+      "aliases": ["distributed tracing", "opentelemetry", "otel", "logging", "structured logging"],
+      "category": "Observability",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "jwt": {
+      "canonical": "JWT",
+      "aliases": ["json web token", "json web tokens"],
+      "category": "Security",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 5
+    },
+    "llm_evaluation": {
+      "canonical": "LLM Evaluation",
+      "aliases": ["evals", "model evaluation", "llm evals", "evaluation framework", "benchmarking llms"],
+      "category": "AI Evaluation",
+      "importance": "high",
+      "prerequisites": ["python"],
+      "estimated_hours": 40
+    },
+    "evals_framework": {
+      "canonical": "Evaluation Frameworks",
+      "aliases": ["ragas", "deepeval", "trulens", "eleuther eval harness", "lm evaluation harness"],
+      "category": "AI Evaluation",
+      "importance": "high",
+      "prerequisites": ["llm_evaluation"],
+      "estimated_hours": 30
+    },
+    "a_b_testing": {
+      "canonical": "A/B Testing",
+      "aliases": ["ab testing", "a/b test", "split testing"],
+      "category": "Analytics",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 15
+    },
+    "fine_tuning": {
+      "canonical": "Fine-tuning",
+      "aliases": ["finetuning", "lora", "qlora", "rlhf", "instruction tuning", "parameter efficient fine tuning", "peft"],
+      "category": "Machine Learning",
+      "importance": "high",
+      "prerequisites": ["pytorch", "huggingface"],
+      "estimated_hours": 60
+    },
+    "mlops": {
+      "canonical": "MLOps",
+      "aliases": ["ml ops", "machine learning operations", "model deployment", "model serving"],
+      "category": "MLOps",
+      "importance": "high",
+      "prerequisites": ["docker"],
+      "estimated_hours": 60
+    },
+    "feature_engineering": {
+      "canonical": "Feature Engineering",
+      "aliases": ["feature extraction", "feature store", "feature pipeline"],
+      "category": "Machine Learning",
+      "importance": "high",
+      "prerequisites": ["pandas"],
+      "estimated_hours": 40
+    },
+    "tableau": {
+      "canonical": "Tableau",
+      "aliases": [],
+      "category": "Analytics",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 25
+    },
+    "power_bi": {
+      "canonical": "Power BI",
+      "aliases": ["powerbi", "power bi desktop"],
+      "category": "Analytics",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 25
+    },
+    "looker": {
+      "canonical": "Looker",
+      "aliases": ["looker studio", "google looker"],
+      "category": "Analytics",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 20
+    },
+    "data_warehousing": {
+      "canonical": "Data Warehousing",
+      "aliases": ["data warehouse", "snowflake", "bigquery", "redshift", "google bigquery"],
+      "category": "Data Engineering",
+      "importance": "high",
+      "prerequisites": ["sql"],
+      "estimated_hours": 50
+    },
+    "statistics": {
+      "canonical": "Statistics",
+      "aliases": ["statistical analysis", "statistical modeling", "hypothesis testing", "probability"],
+      "category": "Data Science",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 80
+    },
+    "llm_agents": {
+      "canonical": "LLM Agents",
+      "aliases": ["ai agents", "agentic ai", "autonomous agents", "tool use", "function calling"],
+      "category": "LLM",
+      "importance": "high",
+      "prerequisites": ["langchain", "openai_api"],
+      "estimated_hours": 40
+    },
+    "customer_success": {
+      "canonical": "Customer Success",
+      "aliases": ["customer engagement", "client success"],
+      "category": "Business",
+      "importance": "medium",
+      "prerequisites": [],
+      "estimated_hours": 0
+    },
+    "technical_communication": {
+      "canonical": "Technical Communication",
+      "aliases": ["technical writing", "documentation", "stakeholder communication", "presentation skills"],
+      "category": "Soft Skills",
+      "importance": "high",
+      "prerequisites": [],
+      "estimated_hours": 0
+    },
+    "api_integration": {
+      "canonical": "API Integration",
+      "aliases": ["third party api", "webhook", "webhooks", "api client"],
+      "category": "Backend",
+      "importance": "medium",
+      "prerequisites": ["rest_api"],
+      "estimated_hours": 15
+    },
+    "harness_platform": {
+      "canonical": "Harness Platform",
+      "aliases": ["harness ci", "harness cd", "harness.io"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": ["ci_cd"],
+      "estimated_hours": 30
+    },
+    "deployment_pipelines": {
+      "canonical": "Deployment Pipelines",
+      "aliases": ["cd pipeline", "release pipeline", "deployment automation", "gitops"],
+      "category": "DevOps",
+      "importance": "high",
+      "prerequisites": ["ci_cd"],
+      "estimated_hours": 30
+    }
+  }
+}
+

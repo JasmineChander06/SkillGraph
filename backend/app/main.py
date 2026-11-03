@@ -2,6 +2,11 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.resume import router as resume_router
+from app.api.roles import router as roles_router
+from app.api.skills import router as skills_router
+from app.api.job_descriptions import router as job_descriptions_router
 from app.config import settings
 
 app = FastAPI(
@@ -22,6 +27,12 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
+
+# Register API Routers
+app.include_router(resume_router)
+app.include_router(roles_router)
+app.include_router(skills_router)
+app.include_router(job_descriptions_router)
 
 
 @app.get("/api/health", tags=["Health"])
@@ -44,4 +55,3 @@ async def root():
         "docs_url": "/docs",
         "health_check": "/api/health",
     }
-

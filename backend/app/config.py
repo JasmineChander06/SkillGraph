@@ -45,8 +45,12 @@ class Settings(BaseSettings):
     HOST: str = "127.0.0.1"
     PORT: int = 8000
 
+    # Resume Upload Configuration (Phase 2)
+    MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
+    MIN_TEXT_LENGTH_THRESHOLD: int = 30  # Minimum non-whitespace characters
+
     model_config = SettingsConfigDict(
-        env_file=(".env", "backend/.env"),
+        env_file=(".env", "backend/.env", "../.env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
