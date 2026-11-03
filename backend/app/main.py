@@ -1,10 +1,10 @@
 """SkillGraph FastAPI Application Entrypoint."""
 
 from contextlib import asynccontextmanager
+import logging
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
@@ -16,13 +16,20 @@ from app.api.skills import router as skills_router
 from app.config import settings
 from app.database import init_db
 
+logger = logging.getLogger("skillgraph.main")
+
 FRONTEND_DIR = Path(__file__).resolve().parent.parent.parent / "frontend"
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifecycle manager: initialize database tables on startup."""
+    """Lifecycle manager: initialize database tables on startup and audit security settings."""
     init_db()
+    if settings.ENVIRONMENT.lower() == "production" and settings.SECRET_KEY.startswith("CHANGE-ME"):
+        logger.warning(
+            "SECURITY WARNING: Default SECRET_KEY is in use in production mode. "
+            "Configure a cryptographically secure SECRET_KEY in environment variables."
+        )
     yield
 
 

@@ -1,0 +1,15 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.py[cod]
+*.db
+*.sqlite
+*.sqlite3
+.pytest_cache
+tests
+.vscode
+scratch
+.env
+backend/.env
+backend/skillgraph.db
