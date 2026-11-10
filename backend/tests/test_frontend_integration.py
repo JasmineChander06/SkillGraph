@@ -60,6 +60,9 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/dashboard.html",
         "/frontend/roles.html",
         "/frontend/roadmap.html",
+        "/frontend/resume-review.html",
+        "/frontend/coding.html",
+        "/frontend/analytics.html",
         "/frontend/css/variables.css",
         "/frontend/css/style.css",
         "/frontend/css/components.css",
@@ -71,6 +74,9 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/js/dashboard.js",
         "/frontend/js/roles.js",
         "/frontend/js/roadmap.js",
+        "/frontend/js/resume-review.js",
+        "/frontend/js/coding.js",
+        "/frontend/js/analytics.js",
     ]
     for r in routes:
         res = integration_client.get(r)
@@ -236,3 +242,27 @@ def test_complete_frontend_backend_integration_lifecycle(integration_client):
     # 12. Expired / Invalid token rejection (HTTP 401)
     invalid_res = integration_client.get("/api/auth/me", headers={"Authorization": "Bearer invalid.token"})
     assert invalid_res.status_code == 401
+
+    # 13. Resume critique & suggestions
+    critique_res = integration_client.post(
+        "/api/resume/critique",
+        json={"text": parsed["text"]},
+        headers=headers,
+    )
+    assert critique_res.status_code == 200
+    critique = critique_res.json()
+    assert "overall_score" in critique
+    assert "rating_label" in critique
+    assert "dimension_scores" in critique
+    assert len(critique["bullet_improvements"]) > 0
+
+    # 14. Market trends analytics
+    trends_res = integration_client.get("/api/job-descriptions/market-trends")
+    assert trends_res.status_code == 200
+    trends = trends_res.json()
+    assert trends["total_roles_analyzed"] == 11
+    assert len(trends["top_in_demand_skills"]) > 0
+
+    # 15. Coding profiles validation rejection (empty payload)
+    prof_invalid = integration_client.post("/api/profiles/analyze", json={})
+    assert prof_invalid.status_code == 422

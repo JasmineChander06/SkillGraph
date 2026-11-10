@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.auth import router as auth_router
 from app.api.job_descriptions import router as job_descriptions_router
+from app.api.profiles import router as profiles_router
 from app.api.resume import router as resume_router
 from app.api.roadmap import router as roadmap_router
 from app.api.roles import router as roles_router
@@ -60,6 +61,7 @@ app.include_router(roles_router)
 app.include_router(skills_router)
 app.include_router(job_descriptions_router)
 app.include_router(roadmap_router)
+app.include_router(profiles_router)
 
 # Serve Frontend static assets if available
 if FRONTEND_DIR.is_dir():

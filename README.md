@@ -448,6 +448,13 @@ All endpoints are prefixed with `/api`. Authentication is via `Authorization: Be
 |--------|----------|------|-------------|
 | `POST` | `/api/resume/parse` | No | Parse a resume file and return extracted text |
 | `POST` | `/api/resume/upload` | Yes | Upload and persist a resume with skill extraction |
+| `POST` | `/api/resume/critique` | No/Yes | Audit resume text, score 0-100, suggest additions/removals and Google XYZ bullet rewrites |
+
+### Coding Profiles
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/api/profiles/analyze` | No | Fetch and score GitHub and LeetCode engineering & interview readiness signals |
 
 ### Skills Analysis
 
@@ -471,6 +478,7 @@ All endpoints are prefixed with `/api`. Authentication is via `Authorization: Be
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `POST` | `/api/job-descriptions/analyze` | Yes | Compare resume against a pasted job description |
+| `GET` | `/api/job-descriptions/market-trends` | No | Get aggregate cross-role skill demand, category distributions, and skill pairs |
 
 ### Roadmaps
 
@@ -599,6 +607,9 @@ http://127.0.0.1:8000/frontend/index.html
 | Dashboard | `/frontend/dashboard.html` | Resume upload, skill analysis, JD comparison |
 | Roles | `/frontend/roles.html` | Role explorer, detail views, comparison tool |
 | Roadmap | `/frontend/roadmap.html` | 6-week timeline with progress tracking |
+| Resume Review | `/frontend/resume-review.html` | Resume quality rating, things to add/remove, and Google XYZ bullet optimizer |
+| Coding Signal | `/frontend/coding.html` | Public GitHub & LeetCode profile analysis and DSA interview readiness |
+| Market Analytics | `/frontend/analytics.html` | Cross-role market demand signals, top recurring skills, and empirical benchmarks |
 
 No build step, no npm install, and no Node.js required. The frontend uses vanilla JavaScript modules loaded directly by the browser.
 
@@ -621,20 +632,23 @@ cd backend
 .\.venv\Scripts\python.exe -m pytest tests -v
 ```
 
-**Test suite summary (155 tests):**
+**Test suite summary (172 tests):**
 
 | Test File | Count | Coverage Area |
 |-----------|-------|---------------|
-| `test_auth.py` | 20 | Registration, login, tokens, authorisation |
-| `test_database.py` | 12 | Table creation, persistence, cascades |
+| `test_auth.py` | 16 | Registration, login, tokens, authorisation |
+| `test_database.py` | 11 | Table creation, persistence, cascades |
 | `test_health.py` | 5 | Health endpoint, CORS headers |
-| `test_resume.py` | 16 | Upload validation, PDF/DOCX parsing |
-| `test_skills.py` | 21 | Skill extraction, analysis, coverage |
-| `test_roadmap.py` | 17 | Roadmap generation, progress tracking |
-| `test_job_description.py` | 12 | JD analysis, section segmentation |
-| `test_role_discovery.py` | 31 | Role listing, comparison, market summaries |
-| `test_workflow.py` | 12 | End-to-end workflow integration |
-| `test_frontend_integration.py` | 9 | Frontend file structure validation |
+| `test_resume.py` | 10 | Upload validation, PDF/DOCX parsing |
+| `test_resume_advisor.py` | 9 | Resume rating, metric quantification, fluff elimination, bullet rewrites |
+| `test_coding_profiles.py` | 5 | GitHub repos & stars, LeetCode Easy/Med/Hard, DSA interview readiness score |
+| `test_job_market_analytics.py` | 3 | Cross-role market trends, skill co-occurrence pairs, category distributions |
+| `test_skills.py` | 36 | Skill extraction boundaries, case-insensitivity, aliases, gap analysis |
+| `test_roadmap.py` | 16 | Roadmap generation, progress tracking, prerequisite chains |
+| `test_job_description.py` | 17 | JD analysis, section segmentation, experience extraction |
+| `test_role_discovery.py` | 31 | Role listing, comparison, market summaries, taxonomy |
+| `test_workflow.py` | 11 | End-to-end workflow integration, IDOR protection |
+| `test_frontend_integration.py` | 2 | Static file verification (21 assets) and 15-step lifecycle integration |
 
 All tests use an in-memory SQLite database and do not require network access.
 

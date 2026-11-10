@@ -761,3 +761,176 @@ SkillGraph uses standard HTTP Bearer token authentication with JSON Web Tokens (
   ```
 * **Errors:** `401 Unauthorized` (unauthenticated).
 
+---
+
+## 8. Resume Advisor & Quality Critique Endpoints
+
+### `POST /api/resume/critique`
+* **Method:** `POST`
+* **Path:** `/api/resume/critique`
+* **Authentication:** Optional (authenticated users can critique saved resumes by `resume_id`)
+* **Request Body (`ResumeCritiqueRequest`):**
+  ```json
+  {
+    "text": "Architected Python FastAPI backend with PostgreSQL and Docker. Scaled to 10k users with 99.9% uptime.",
+    "resume_id": 1
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "overall_score": 82,
+    "rating_label": "Competitive",
+    "dimension_scores": {
+      "quantification": 21.0,
+      "action_verbs": 21.0,
+      "keyword_density": 21.0,
+      "brevity_and_clarity": 19.0
+    },
+    "strengths": [
+      "Strong quantification: detected 3 measurable impact metrics, percentages, or scale indicators.",
+      "Solid technical vocabulary: recognized 4 verified engineering tools and skills."
+    ],
+    "things_to_add": [
+      "Include a link to your public GitHub profile (github.com/yourusername) or live demonstration links."
+    ],
+    "things_to_remove": [
+      "Eliminate generic buzzword 'team player' — demonstrate competence through shipped project outcomes instead."
+    ],
+    "bullet_improvements": [
+      {
+        "original": "Built backend APIs using FastAPI and connected to PostgreSQL database.",
+        "improved": "Engineered 14 production REST endpoints in FastAPI with SQLAlchemy, handling 2,500 daily requests with sub-50ms p95 latency.",
+        "reason": "Google XYZ Formula: Specifies what was built (endpoints), how it was measured (requests/latency), and tools used."
+      }
+    ],
+    "summary": "Resume evaluated at 82/100 (Competitive). 2 positive signal areas detected. Action items: 1 high-priority additions and 1 fluff phrases flagged for removal."
+  }
+  ```
+* **Errors:** `403 Forbidden` (user does not own specified resume), `404 Not Found`, `422 Unprocessable Entity` (empty text).
+
+---
+
+## 9. Coding Profiles (GitHub & LeetCode) Endpoints
+
+### `POST /api/profiles/analyze`
+* **Method:** `POST`
+* **Path:** `/api/profiles/analyze`
+* **Authentication:** None
+* **Request Body (`CodingProfilesRequest`):**
+  ```json
+  {
+    "github_username": "octocat",
+    "leetcode_username": "tourist"
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "github": {
+      "username": "octocat",
+      "name": "The Octocat",
+      "avatar_url": "https://avatars.githubusercontent.com/u/583231",
+      "profile_url": "https://github.com/octocat",
+      "public_repos": 8,
+      "followers": 25,
+      "total_stars": 25,
+      "primary_languages": {
+        "Python": 66.7,
+        "TypeScript": 33.3
+      },
+      "quality_score": 75,
+      "summary": "Active GitHub profile with 8 public repositories and 25 total stargazers."
+    },
+    "leetcode": {
+      "username": "tourist",
+      "profile_url": "https://leetcode.com/tourist",
+      "total_solved": 220,
+      "easy_solved": 60,
+      "medium_solved": 130,
+      "hard_solved": 30,
+      "acceptance_rate": 58.5,
+      "ranking": 45000,
+      "dsa_readiness_score": 85,
+      "dsa_readiness_tier": "Interview Ready",
+      "interview_recommendations": [
+        "Strong algorithmic foundation: prioritize mock timed interviews and system design.",
+        "Review edge cases and space complexity trade-offs for Hard-level dynamic programming and graph problems."
+      ]
+    },
+    "combined_signal_score": 80,
+    "strengths": [
+      "GitHub: 8 public repos with 25 stars.",
+      "LeetCode: 220 solved (130 Mediums, 30 Hards)."
+    ],
+    "recommendations": [
+      "Strong algorithmic foundation: prioritize mock timed interviews and system design."
+    ],
+    "summary": "Technical interview readiness scored at 80/100 based on GitHub and LeetCode."
+  }
+  ```
+* **Errors:** `422 Unprocessable Entity` (both handles empty or whitespace).
+
+---
+
+## 10. Job Market Analytics Endpoints
+
+### `GET /api/job-descriptions/market-trends`
+* **Method:** `GET`
+* **Path:** `/api/job-descriptions/market-trends`
+* **Authentication:** None
+* **Query Parameters:**
+  * `family` *(optional, string)*: Filter by role family (`Engineering`, `AI/ML`, `Data`).
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "total_roles_analyzed": 11,
+    "role_family_filter": "All Families",
+    "top_in_demand_skills": [
+      {
+        "skill": "Python",
+        "weighted_frequency": 22,
+        "demand_index": 100.0
+      },
+      {
+        "skill": "Docker",
+        "weighted_frequency": 16,
+        "demand_index": 72.7
+      }
+    ],
+    "category_distribution": {
+      "Engineering": 55.0,
+      "AI/ML": 30.0,
+      "Data": 15.0
+    },
+    "maturity_breakdown": {
+      "established_roles": 4,
+      "emerging_roles": 7
+    },
+    "skill_pairs": [
+      {
+        "pair": ["Python", "FastAPI"],
+        "relevance": "API & Microservices Architecture",
+        "overlap_pct": 92
+      }
+    ],
+    "empirical_benchmarks": [
+      {
+        "role_id": "backend-engineer",
+        "role_title": "Backend Engineer",
+        "sample_size": 120,
+        "provenance": {
+          "source": "Curated Tech Job Postings Corpus",
+          "collection_date": "2026-Q1",
+          "geography": "Global Remote / US"
+        },
+        "top_demanded_skills": [
+          {"name": "Python", "frequency_percent": 84.2}
+        ]
+      }
+    ],
+    "methodology_disclaimer": "Market trends are synthesized from verified empirical job-description corpora (where documented) and curated engineering role ontologies."
+  }
+  ```
+
+

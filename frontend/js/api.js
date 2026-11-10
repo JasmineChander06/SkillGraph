@@ -133,6 +133,10 @@ const API = (() => {
           body: formData
         });
       },
+      critique: (payload) => request("/api/resume/critique", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      }),
       listRecords: () => request("/api/resume/records", { method: "GET" }),
       getRecord: (id) => request(`/api/resume/records/${id}`, { method: "GET" }),
       deleteRecord: (id) => request(`/api/resume/records/${id}`, { method: "DELETE" })
@@ -157,7 +161,19 @@ const API = (() => {
           job_description_text: jobDescriptionText
         })
       }),
-      listAnalyses: () => request("/api/job-descriptions/analyses", { method: "GET" })
+      listAnalyses: () => request("/api/job-descriptions/analyses", { method: "GET" }),
+      getMarketTrends: (family = null) => {
+        const query = family ? `?family=${encodeURIComponent(family)}` : "";
+        return request(`/api/job-descriptions/market-trends${query}`, { method: "GET" });
+      }
+    },
+
+    // 7. Coding Profiles (GitHub + LeetCode)
+    profiles: {
+      analyze: (handles) => request("/api/profiles/analyze", {
+        method: "POST",
+        body: JSON.stringify(handles)
+      })
     },
 
     // 7. Roadmaps & Progress

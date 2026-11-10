@@ -18,6 +18,7 @@ from app.schemas.job_description import (
 )
 from app.services import job_description_analyzer
 from app.services.auth import get_current_user, get_optional_current_user
+from app.services.job_market_analytics import compute_market_trends
 
 logger = logging.getLogger("skillgraph.api.job_descriptions")
 
@@ -170,3 +171,17 @@ async def delete_user_jd_analysis(
     db.delete(record)
     db.commit()
     return {"ok": True, "message": f"Job description analysis record {analysis_id} deleted."}
+
+
+@router.get(
+    "/api/job-descriptions/market-trends",
+    status_code=status.HTTP_200_OK,
+    summary="Get Aggregate Job Market Trends",
+    description="Retrieve top in-demand skills, category distributions, skill pairs, and empirical benchmarks across role families.",
+)
+async def get_market_trends(
+    family: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Return aggregated cross-role market signals and demand density."""
+    return compute_market_trends(family=family)
+

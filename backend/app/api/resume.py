@@ -13,7 +13,9 @@ from app.database import get_db
 from app.models.resume import ResumeRecord
 from app.models.user import User
 from app.schemas.resume import ResumeParseResponse
+from app.schemas.resume_advisor import ResumeCritiqueRequest, ResumeCritiqueResponse
 from app.services.auth import get_current_user, get_optional_current_user
+from app.services.resume_advisor import critique_resume_text
 from app.services.resume_parser import (
     CorruptDocumentError,
     EmptyFileError,
@@ -209,3 +211,50 @@ async def delete_resume_record(
     db.delete(record)
     db.commit()
     return {"ok": True, "message": f"Resume record {record_id} permanently deleted."}
+
+
+@router.post(
+    "/api/resume/critique",
+    response_model=ResumeCritiqueResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Critique and Rate Resume",
+    description="Analyze resume text or saved resume ID for quantification, action verbs, keyword density, and fluff elimination.",
+)
+async def critique_resume(
+    payload: ResumeCritiqueRequest,
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
+) -> ResumeCritiqueResponse:
+    """Audit resume text, provide a score from 0-100, suggest things to add/remove, and Google XYZ bullet rewrites."""
+    text_to_analyze = payload.text
+
+    if not text_to_analyze and payload.resume_id:
+        record = (
+            db.query(ResumeRecord)
+            .filter(ResumeRecord.id == payload.resume_id, ResumeRecord.is_deleted == False)
+            .first()
+        )
+        if not record:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Specified resume record not found.")
+        if current_user and record.user_id and record.user_id != current_user.id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied: you do not own this resume.")
+        text_to_analyze = record.extracted_text
+
+    if not text_to_analyze and current_user:
+        latest = (
+            db.query(ResumeRecord)
+            .filter(ResumeRecord.user_id == current_user.id, ResumeRecord.is_deleted == False)
+            .order_by(ResumeRecord.id.desc())
+            .first()
+        )
+        if latest:
+            text_to_analyze = latest.extracted_text
+
+    if not text_to_analyze:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Please provide resume text or specify a valid resume_id to critique.",
+        )
+
+    return critique_resume_text(text_to_analyze)
+
