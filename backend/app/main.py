@@ -84,8 +84,10 @@ async def health_check():
 async def root(request: Request):
     """Root endpoint: redirects browser requests to frontend landing page, returns JSON for API clients."""
     accept = request.headers.get("accept", "")
-    if "text/html" in accept and "application/json" not in accept:
+    # Browsers requesting HTML are redirected to the frontend landing page
+    if "text/html" in accept:
         return RedirectResponse(url="/frontend/index.html")
+    # API clients, tests, or tools requesting root receive the JSON API description
     return {
         "message": f"Welcome to {settings.APP_NAME}",
         "version": settings.APP_VERSION,

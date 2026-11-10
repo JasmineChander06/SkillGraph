@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import httpx
 
 from app.schemas.coding_profiles import (
     CodingProfilesResponse,
+    CodingSkillsBreakdown,
+    GitHubRepoProject,
     GitHubSignal,
     LeetCodeSignal,
 )
+from app.services.skill_analyzer import get_role
+from app.services.skill_extractor import extract_skills
 
 logger = logging.getLogger("skillgraph.services.coding_profiles")
 
@@ -86,6 +90,37 @@ async def fetch_github_signal(
             f"Primary languages: {', '.join(primary_languages.keys()) or 'Multi-language'}."
         )
 
+        # Extract demonstrated skills from top repositories
+        top_projects: List[GitHubRepoProject] = []
+        for r in repos_data[:8]:
+            if not isinstance(r, dict):
+                continue
+            r_name = r.get("name", "")
+            r_desc = r.get("description") or ""
+            r_lang = r.get("language") or ""
+            r_topics = r.get("topics") or []
+            r_stars = r.get("stargazers_count", 0)
+            r_url = r.get("html_url", f"https://github.com/{clean_username}/{r_name}")
+
+            # Extract demonstrated skills from name, description, topics, language
+            search_blob = f"{r_name} {r_desc} {' '.join(r_topics)} {r_lang}"
+            matches = extract_skills(search_blob)
+            demonstrated = [m.canonical_name for m in matches]
+            if r_lang and r_lang not in demonstrated:
+                demonstrated.append(r_lang)
+
+            top_projects.append(
+                GitHubRepoProject(
+                    name=r_name,
+                    description=r_desc,
+                    language=r_lang,
+                    topics=r_topics,
+                    stars=r_stars,
+                    html_url=r_url,
+                    demonstrated_skills=demonstrated[:6],
+                )
+            )
+
         return GitHubSignal(
             username=clean_username,
             name=user_data.get("name"),
@@ -97,6 +132,7 @@ async def fetch_github_signal(
             primary_languages=primary_languages,
             quality_score=quality_score,
             summary=summary,
+            top_projects=top_projects,
         )
     except Exception as exc:
         logger.error("Failed to fetch GitHub profile for %s: %s", clean_username, exc)
@@ -229,6 +265,8 @@ async def fetch_leetcode_signal(
 async def analyze_coding_profiles(
     github_username: Optional[str] = None,
     leetcode_username: Optional[str] = None,
+    user_skills: Optional[List[str]] = None,
+    target_role: Optional[str] = None,
     client: Optional[httpx.AsyncClient] = None,
 ) -> CodingProfilesResponse:
     """Analyze both GitHub and LeetCode handles and generate unified technical signal report."""
@@ -275,12 +313,39 @@ async def analyze_coding_profiles(
             f"{len(strengths)} positive proof points identified."
         )
 
+    # Three-tier project evidence breakdown
+    coding_verified_set: Set[str] = set()
+    if github_signal and github_signal.top_projects:
+        for proj in github_signal.top_projects:
+            for s in proj.demonstrated_skills:
+                coding_verified_set.add(s)
+
+    resume_skills_list = [s for s in (user_skills or []) if isinstance(s, str) and s.strip()]
+
+    needing_evidence: List[str] = []
+    if target_role:
+        role_profile = get_role(target_role)
+        if role_profile:
+            core_reqs = role_profile.get("core_skills", [])
+            for c in core_reqs:
+                c_name = c.replace("_", " ").title()
+                is_coded = any(c.lower() in cv.lower() or cv.lower() in c.lower() for cv in coding_verified_set)
+                if not is_coded:
+                    needing_evidence.append(c_name)
+
+    breakdown = CodingSkillsBreakdown(
+        resume_skills=resume_skills_list,
+        coding_verified_skills=sorted(list(coding_verified_set)),
+        skills_needing_evidence=needing_evidence,
+    )
+
     return CodingProfilesResponse(
         github=github_signal,
         leetcode=leetcode_signal,
         combined_signal_score=combined_score,
         strengths=strengths,
         recommendations=recommendations,
+        skills_breakdown=breakdown,
         summary=summary,
     )
 

@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.progress import TaskProgressRecord
+from app.models.resume import ResumeRecord
 from app.models.roadmap import RoadmapRecord, RoadmapTaskRecord
 from app.models.user import User
 from app.schemas.auth import ProgressSummaryResponse, TaskProgressItem, TaskStatusUpdateRequest
@@ -43,13 +44,33 @@ async def generate_roadmap(
 
     Persists the generated roadmap and tasks when called by an authenticated user.
     """
+    existing_skills = request.existing_skills or []
+    resume_text = request.resume_text
+
+    # If authenticated and existing_skills was not passed, load from user's latest resume
+    if current_user and not existing_skills:
+        latest_resume = (
+            db.query(ResumeRecord)
+            .filter(ResumeRecord.user_id == current_user.id, ResumeRecord.is_deleted == False)
+            .order_by(ResumeRecord.created_at.desc())
+            .first()
+        )
+        if latest_resume:
+            if not resume_text:
+                resume_text = latest_resume.extracted_text
+            if latest_resume.extracted_skills_json:
+                try:
+                    existing_skills = json.loads(latest_resume.extracted_skills_json)
+                except Exception:
+                    pass
+
     try:
         roadmap = roadmap_generator.generate_roadmap(
             role_id=request.role_id,
-            existing_skills=request.existing_skills,
+            existing_skills=existing_skills,
             missing_skills=request.missing_skills,
             weekly_hours=request.weekly_hours or 10,
-            resume_text=request.resume_text,
+            resume_text=resume_text,
         )
     except KeyError as exc:
         raise HTTPException(

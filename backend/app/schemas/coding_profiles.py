@@ -12,6 +12,17 @@ class CodingProfilesRequest(BaseModel):
     leetcode_username: Optional[str] = Field(None, description="LeetCode username handle")
 
 
+class GitHubRepoProject(BaseModel):
+    """Public repository details with detected project competencies."""
+    name: str
+    description: Optional[str] = None
+    language: Optional[str] = None
+    topics: List[str] = Field(default_factory=list)
+    stars: int = Field(default=0, ge=0)
+    html_url: str
+    demonstrated_skills: List[str] = Field(default_factory=list)
+
+
 class GitHubSignal(BaseModel):
     """Derived engineering signals from public GitHub account."""
     username: str
@@ -24,6 +35,14 @@ class GitHubSignal(BaseModel):
     primary_languages: Dict[str, float] = Field(default_factory=dict, description="Language percentage distribution")
     quality_score: int = Field(..., ge=0, le=100, description="Overall repository quality and activity score")
     summary: str
+    top_projects: List[GitHubRepoProject] = Field(default_factory=list)
+
+
+class CodingSkillsBreakdown(BaseModel):
+    """Three-tier comparison: resume evidence vs coding project evidence vs unverified skills."""
+    resume_skills: List[str] = Field(default_factory=list)
+    coding_verified_skills: List[str] = Field(default_factory=list)
+    skills_needing_evidence: List[str] = Field(default_factory=list)
 
 
 class LeetCodeSignal(BaseModel):
@@ -48,5 +67,6 @@ class CodingProfilesResponse(BaseModel):
     combined_signal_score: int = Field(..., ge=0, le=100)
     strengths: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
+    skills_breakdown: Optional[CodingSkillsBreakdown] = None
     summary: str
 

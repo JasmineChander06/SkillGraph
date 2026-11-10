@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.resume import ResumeRecord
 from app.models.user import User
-from app.schemas.resume import ResumeParseResponse
+from app.schemas.resume import ResumeParseResponse, UpdateSkillsRequest
 from app.schemas.resume_advisor import ResumeCritiqueRequest, ResumeCritiqueResponse
 from app.services.auth import get_current_user, get_optional_current_user
 from app.services.resume_advisor import critique_resume_text
@@ -24,7 +24,7 @@ from app.services.resume_parser import (
     UnsupportedFileTypeError,
     parse_resume_bytes,
 )
-from app.services.skill_extractor import extract_skills
+from app.services.skill_extractor import extract_skills, get_skill_meta
 
 logger = logging.getLogger("skillgraph.api.resume")
 
@@ -211,6 +211,102 @@ async def delete_resume_record(
     db.delete(record)
     db.commit()
     return {"ok": True, "message": f"Resume record {record_id} permanently deleted."}
+
+
+@router.put(
+    "/api/resume/records/{record_id}/skills",
+    status_code=status.HTTP_200_OK,
+    summary="Update Confirmed Skills on Specific Resume",
+)
+async def update_resume_skills(
+    record_id: int,
+    payload: UpdateSkillsRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Save user-confirmed or corrected skills to a specific resume record."""
+    record = (
+        db.query(ResumeRecord)
+        .filter(ResumeRecord.id == record_id, ResumeRecord.is_deleted == False)
+        .first()
+    )
+    if not record:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resume record not found.")
+
+    if record.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access forbidden: you do not own this resume record.",
+        )
+
+    enriched = []
+    for s in payload.skills:
+        clean = s.strip().lower()
+        meta = get_skill_meta(clean)
+        enriched.append({
+            "skill_id": clean,
+            "canonical_name": meta.get("canonical", s.strip()),
+            "category": meta.get("category", "General"),
+            "matched_via": "user_confirmed",
+        })
+    record.set_extracted_skills(enriched)
+    db.commit()
+    db.refresh(record)
+    return {
+        "ok": True,
+        "resume_id": record.id,
+        "skills_count": len(enriched),
+        "skills": enriched,
+    }
+
+
+@router.put(
+    "/api/resume/skills",
+    status_code=status.HTTP_200_OK,
+    summary="Update Confirmed Skills on Latest Resume",
+)
+async def update_latest_resume_skills(
+    payload: UpdateSkillsRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Save user-confirmed or corrected skills to the user's latest resume record."""
+    latest = (
+        db.query(ResumeRecord)
+        .filter(ResumeRecord.user_id == current_user.id, ResumeRecord.is_deleted == False)
+        .order_by(ResumeRecord.id.desc())
+        .first()
+    )
+    if not latest:
+        latest = ResumeRecord(
+            user_id=current_user.id,
+            filename="Confirmed Skills Profile",
+            file_type="manual",
+            file_size_bytes=0,
+            extracted_text=" ".join(payload.skills),
+        )
+        db.add(latest)
+        db.flush()
+
+    enriched = []
+    for s in payload.skills:
+        clean = s.strip().lower()
+        meta = get_skill_meta(clean)
+        enriched.append({
+            "skill_id": clean,
+            "canonical_name": meta.get("canonical", s.strip()),
+            "category": meta.get("category", "General"),
+            "matched_via": "user_confirmed",
+        })
+    latest.set_extracted_skills(enriched)
+    db.commit()
+    db.refresh(latest)
+    return {
+        "ok": True,
+        "resume_id": latest.id,
+        "skills_count": len(enriched),
+        "skills": enriched,
+    }
 
 
 @router.post(

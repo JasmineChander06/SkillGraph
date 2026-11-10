@@ -140,7 +140,14 @@ const API = (() => {
       },
       get: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}`, { method: "GET" }),
       getRelated: (roleId, topN = 4) => request(`/api/roles/${encodeURIComponent(roleId)}/related?top_n=${topN}`, { method: "GET" }),
-      compare: (roleA, roleB) => request(`/api/roles/compare?role_a=${encodeURIComponent(roleA)}&role_b=${encodeURIComponent(roleB)}`, { method: "GET" }),
+      compare: (roleA, roleB, userSkills = null) => {
+        let url = `/api/roles/compare?role_a=${encodeURIComponent(roleA)}&role_b=${encodeURIComponent(roleB)}`;
+        if (userSkills) {
+          const skillsStr = Array.isArray(userSkills) ? userSkills.join(",") : userSkills;
+          url += `&user_skills=${encodeURIComponent(skillsStr)}`;
+        }
+        return request(url, { method: "GET" });
+      },
       getMarketSummary: (roleId) => request(`/api/roles/${encodeURIComponent(roleId)}/market-summary`, { method: "GET" })
     },
 
@@ -160,7 +167,14 @@ const API = (() => {
       }),
       listRecords: () => request("/api/resume/records", { method: "GET" }),
       getRecord: (id) => request(`/api/resume/records/${id}`, { method: "GET" }),
-      deleteRecord: (id) => request(`/api/resume/records/${id}`, { method: "DELETE" })
+      deleteRecord: (id) => request(`/api/resume/records/${id}`, { method: "DELETE" }),
+      updateSkills: (skills, recordId = null) => {
+        const url = recordId ? `/api/resume/records/${recordId}/skills` : "/api/resume/skills";
+        return request(url, {
+          method: "PUT",
+          body: JSON.stringify({ skills })
+        });
+      }
     },
 
     // 5. Skills & Gap Analysis
@@ -195,7 +209,8 @@ const API = (() => {
         method: "POST",
         body: JSON.stringify(handles)
       }),
-      getSaved: () => request("/api/profiles/saved", { method: "GET" })
+      getSaved: () => request("/api/profiles/saved", { method: "GET" }),
+      getMe: () => request("/api/profiles/me", { method: "GET" })
     },
 
     // 7. Roadmaps & Progress

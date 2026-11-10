@@ -129,17 +129,83 @@ const Dashboard = (() => {
   };
 
   /**
+   * Categorize user confirmed skills into standard taxonomy categories
+   */
+  const categorizeSkills = (skills) => {
+    const categories = {
+      "Programming Languages": {
+        count: 0,
+        benchmark: 4,
+        keywords: ["python", "javascript", "typescript", "java", "c++", "c#", "go", "golang", "rust", "ruby", "sql", "html", "css", "c_lang", "r_lang", "scala", "kotlin", "swift"]
+      },
+      "Frameworks & Libraries": {
+        count: 0,
+        benchmark: 6,
+        keywords: ["fastapi", "django", "flask", "react", "vue", "angular", "express", "node", "next.js", "pytorch", "tensorflow", "scikit_learn", "scikit-learn", "pandas", "numpy", "spring", "spring boot", "celery"]
+      },
+      "Databases & Storage": {
+        count: 0,
+        benchmark: 4,
+        keywords: ["postgresql", "postgres", "mysql", "mongodb", "redis", "sqlite", "elasticsearch", "cassandra", "dynamodb", "snowflake", "bigquery", "vector_db", "pinecone", "milvus", "qdrant", "weaviate"]
+      },
+      "Cloud & DevOps": {
+        count: 0,
+        benchmark: 5,
+        keywords: ["docker", "kubernetes", "aws", "gcp", "azure", "ci/cd", "ci_cd", "github actions", "gitlab", "terraform", "helm", "linux", "nginx", "harness_platform", "deployment_pipelines"]
+      },
+      "AI & Machine Learning": {
+        count: 0,
+        benchmark: 5,
+        keywords: ["machine learning", "deep learning", "nlp", "computer vision", "llm", "langchain", "llama_index", "rag", "fine-tuning", "vllm", "mlflow", "transformers", "openai_api", "prompt_engineering"]
+      },
+      "Tools & Methodologies": {
+        count: 0,
+        benchmark: 4,
+        keywords: ["git", "github", "jira", "agile", "scrum", "rest api", "rest_api", "graphql", "grpc", "unit testing", "pytest", "microservices", "system design", "kafka", "rabbitmq"]
+      }
+    };
+
+    const lowerSkills = (skills || []).map(s => {
+      if (typeof s === 'string') return s.toLowerCase().trim();
+      return (s.canonical_name || s.name || s.id || '').toLowerCase().trim();
+    });
+
+    lowerSkills.forEach(skill => {
+      let matched = false;
+      for (const [catName, catData] of Object.entries(categories)) {
+        if (catData.keywords.some(k => skill === k || skill.includes(k) || k.includes(skill))) {
+          catData.count++;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched && skill) {
+        categories["Tools & Methodologies"].count++;
+      }
+    });
+
+    return categories;
+  };
+
+  /**
    * Load real, non-fabricated user data from database
    */
   const loadUserData = async () => {
     const kpiReadiness = document.getElementById("kpi-readiness");
     const kpiReadinessSub = document.getElementById("kpi-readiness-sub");
+    const kpiSecondaryReadiness = document.getElementById("kpi-secondary-readiness");
+    const kpiSecondaryReadinessSub = document.getElementById("kpi-secondary-readiness-sub");
     const kpiSkills = document.getElementById("kpi-skills");
     const kpiSkillsSub = document.getElementById("kpi-skills-sub");
     const kpiRoadmaps = document.getElementById("kpi-roadmaps");
+    const kpiRoadmapsSub = document.getElementById("kpi-roadmaps-sub");
+
+    const twoRoleCard = document.getElementById("two-role-summary-card");
+    const categoryGapsSec = document.getElementById("category-and-gaps-section");
 
     const user = API.auth.getUser() || {};
     userTargetRole = user.target_role || localStorage.getItem(CONFIG.STORAGE_KEYS.ACTIVE_ROLE) || "backend-engineer";
+    const secondaryRole = user.secondary_role || (userTargetRole === "backend-engineer" ? "data-engineer" : "backend-engineer");
 
     try {
       // 1. Fetch user's saved resumes from DB
@@ -156,40 +222,160 @@ const Dashboard = (() => {
           syncTextarea.value = activeResumeText;
         }
 
-        // Calculate REAL coverage for user's target role
-        const analysis = await API.skills.analyze(activeResumeText, userTargetRole);
-        const readinessScore = Math.round(analysis.coverage_percent);
+        // Calculate REAL coverage for Primary Target Role
+        const analysisA = await API.skills.analyze(activeResumeText, userTargetRole);
+        const readinessA = Math.round(analysisA.coverage_percent);
 
-        if (kpiReadiness) kpiReadiness.textContent = `${readinessScore}%`;
-        if (kpiReadinessSub) kpiReadinessSub.textContent = `Target: ${analysis.role_title}`;
+        // Calculate REAL coverage for Secondary Alternative Role
+        let readinessB = 0;
+        let analysisB = null;
+        try {
+          analysisB = await API.skills.analyze(activeResumeText, secondaryRole);
+          readinessB = Math.round(analysisB.coverage_percent);
+        } catch {
+          readinessB = 0;
+        }
+
+        if (kpiReadiness) kpiReadiness.textContent = `${readinessA}%`;
+        if (kpiReadinessSub) kpiReadinessSub.textContent = `Target: ${analysisA.role_title}`;
+        if (kpiSecondaryReadiness) kpiSecondaryReadiness.textContent = `${readinessB}%`;
+        if (kpiSecondaryReadinessSub) kpiSecondaryReadinessSub.textContent = `Path: ${analysisB ? analysisB.role_title : secondaryRole}`;
         if (kpiSkills) kpiSkills.textContent = `${skills.length}`;
         if (kpiSkillsSub) kpiSkillsSub.textContent = `From ${latestResume.filename}`;
 
-        renderRealRadarChart("radar-chart-container", skills, analysis);
-        renderRealTrajectoryChart("trajectory-chart-container", readinessScore);
+        // Populate Two-Role Comparison Summary Card
+        if (twoRoleCard) {
+          twoRoleCard.classList.remove("hidden");
+          const roleAName = document.getElementById("role-a-name");
+          const roleAScorePill = document.getElementById("role-a-score-pill");
+          const roleAProgress = document.getElementById("role-a-progress-fill");
+          const roleASkills = document.getElementById("role-a-skills-summary");
+
+          const roleBName = document.getElementById("role-b-name");
+          const roleBScorePill = document.getElementById("role-b-score-pill");
+          const roleBProgress = document.getElementById("role-b-progress-fill");
+          const roleBSkills = document.getElementById("role-b-skills-summary");
+
+          const compareLink = document.getElementById("two-role-compare-link");
+          if (compareLink) {
+            compareLink.setAttribute("href", `roles.html?compare=${encodeURIComponent(userTargetRole)},${encodeURIComponent(secondaryRole)}`);
+          }
+
+          if (roleAName) roleAName.textContent = analysisA.role_title;
+          if (roleAScorePill) roleAScorePill.textContent = `${readinessA}%`;
+          if (roleAProgress) roleAProgress.style.width = `${readinessA}%`;
+          if (roleASkills) roleASkills.textContent = `${analysisA.matched_skills.length} core skills matched (${analysisA.missing_skills.length} missing)`;
+
+          if (roleBName && analysisB) roleBName.textContent = analysisB.role_title;
+          if (roleBScorePill) roleBScorePill.textContent = `${readinessB}%`;
+          if (roleBProgress) roleBProgress.style.width = `${readinessB}%`;
+          if (roleBSkills && analysisB) roleBSkills.textContent = `${analysisB.matched_skills.length} core skills matched (${analysisB.missing_skills.length} missing)`;
+
+          // Fetch bidirectional overlap
+          try {
+            const comp = await API.roles.compare(userTargetRole, secondaryRole);
+            const overlapEl = document.getElementById("two-role-overlap-pct");
+            const transferDesc = document.getElementById("two-role-transfer-desc");
+            const bridgeHours = document.getElementById("two-role-bridge-hours");
+
+            if (overlapEl) overlapEl.textContent = `${comp.overlap_percentage}%`;
+            if (transferDesc) {
+              transferDesc.textContent = `${comp.shared_core_count} shared core competencies between ${comp.role_a.canonical_title} and ${comp.role_b.canonical_title}.`;
+            }
+            if (bridgeHours) {
+              const estHours = comp.transition_a_to_b ? comp.transition_a_to_b.estimated_hours : 40;
+              bridgeHours.textContent = `~${estHours}h transition bridge effort`;
+            }
+          } catch (compErr) {
+            console.warn("Could not fetch dual role overlap:", compErr);
+          }
+        }
+
+        // Populate Category Coverage & Gap Prioritization
+        if (categoryGapsSec) {
+          categoryGapsSec.classList.remove("hidden");
+
+          const categoryList = document.getElementById("category-coverage-list");
+          if (categoryList) {
+            const categorized = categorizeSkills(skills);
+            categoryList.innerHTML = Object.entries(categorized).map(([catName, data]) => {
+              const pct = Math.min(100, Math.round((data.count / data.benchmark) * 100));
+              return `
+                <div>
+                  <div class="flex items-center justify-between" style="font-size:0.8rem; margin-bottom:0.25rem;">
+                    <span style="font-weight:500;">${App.escapeHtml(catName)}</span>
+                    <span style="font-family:var(--font-mono); color:var(--muted-foreground);">${data.count} / ${data.benchmark} target</span>
+                  </div>
+                  <div class="progress-track" style="height:6px;">
+                    <div class="progress-fill" style="width:${pct}%;"></div>
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+
+          const matchedCount = document.getElementById("matched-skills-count");
+          const matchedContainer = document.getElementById("matched-skills-container");
+          if (matchedCount) matchedCount.textContent = `${analysisA.matched_skills.length}`;
+          if (matchedContainer) {
+            matchedContainer.innerHTML = (analysisA.matched_skills || []).map(s => `
+              <span class="skill-tag" style="background:oklch(0.95 0.05 145); color:#059669; border-color:#059669;">
+                ${App.escapeHtml(s.canonical_name || s.name || s)} &check;
+              </span>
+            `).join("") || `<span style="font-size:0.8rem; color:var(--muted-foreground);">No core skills matched yet</span>`;
+          }
+
+          const missingCount = document.getElementById("missing-skills-count");
+          const missingContainer = document.getElementById("missing-skills-container");
+          if (missingCount) missingCount.textContent = `${analysisA.missing_skills.length}`;
+          if (missingContainer) {
+            matchedContainer.innerHTML = (analysisA.missing_skills || []).map(s => `
+              <span class="skill-tag missing" title="~${s.estimated_hours || 15}h effort">
+                ${App.escapeHtml(s.canonical_name || s.name || s)} (~${s.estimated_hours || 15}h)
+              </span>
+            `).join("") || `<span style="font-size:0.8rem; color:#059669;">Zero gaps! Role ready.</span>`;
+          }
+        }
+
+        renderRealRadarChart("radar-chart-container", skills, analysisA);
+        renderRealTrajectoryChart("trajectory-chart-container", readinessA);
         await renderTargetRolesAnalyzed(loadedRoles.slice(0, 3), activeResumeText);
 
       } else {
         // Honest empty state for new account (no fabricated scores)
         if (kpiReadiness) kpiReadiness.textContent = "—";
         if (kpiReadinessSub) kpiReadinessSub.textContent = "Upload resume in Resume";
+        if (kpiSecondaryReadiness) kpiSecondaryReadiness.textContent = "—";
+        if (kpiSecondaryReadinessSub) kpiSecondaryReadinessSub.textContent = "Awaiting resume parse";
         if (kpiSkills) kpiSkills.textContent = "0";
         if (kpiSkillsSub) kpiSkillsSub.textContent = "Awaiting resume parse";
+
+        if (twoRoleCard) twoRoleCard.classList.add("hidden");
+        if (categoryGapsSec) categoryGapsSec.classList.add("hidden");
 
         renderEmptyRadarChart("radar-chart-container");
         renderEmptyTrajectoryChart("trajectory-chart-container");
         renderTargetRolesPending(loadedRoles.slice(0, 3));
       }
 
-      // 2. Fetch saved roadmaps count
+      // 2. Fetch saved roadmaps count & progress
       let savedRoadmaps = [];
       try {
         savedRoadmaps = await API.roadmaps.list();
-        if (kpiRoadmaps) {
-          kpiRoadmaps.textContent = Array.isArray(savedRoadmaps) ? `${savedRoadmaps.length}` : "0";
+        if (savedRoadmaps && savedRoadmaps.length > 0) {
+          const totalTasks = savedRoadmaps.reduce((sum, r) => sum + (r.total_tasks || 0), 0);
+          const completedTasks = savedRoadmaps.reduce((sum, r) => sum + (r.completed_tasks || 0), 0);
+          const overallPct = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+          if (kpiRoadmaps) kpiRoadmaps.textContent = `${overallPct}%`;
+          if (kpiRoadmapsSub) kpiRoadmapsSub.textContent = `${completedTasks} of ${totalTasks} tasks complete`;
+        } else {
+          if (kpiRoadmaps) kpiRoadmaps.textContent = "0%";
+          if (kpiRoadmapsSub) kpiRoadmapsSub.textContent = "Awaiting roadmap generation";
         }
       } catch {
-        if (kpiRoadmaps) kpiRoadmaps.textContent = "0";
+        if (kpiRoadmaps) kpiRoadmaps.textContent = "0%";
+        if (kpiRoadmapsSub) kpiRoadmapsSub.textContent = "0 tasks completed";
       }
 
       // 3. Update dynamic workflow guidance based on real saved data (Requirement 7)

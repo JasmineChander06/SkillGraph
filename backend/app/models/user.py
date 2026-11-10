@@ -8,7 +8,7 @@ import secrets
 from datetime import datetime
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import Boolean, DateTime, Integer, String, func
+from sqlalchemy import Boolean, DateTime, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -52,8 +52,10 @@ class User(Base):
     career_interests: Mapped[str | None] = mapped_column(String(255), nullable=True)
     skill_level: Mapped[str | None] = mapped_column(String(50), nullable=True)
     target_role: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    secondary_role: Mapped[str | None] = mapped_column(String(100), nullable=True)
     github_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
     leetcode_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    coding_signal_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

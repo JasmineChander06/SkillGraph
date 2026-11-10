@@ -30,8 +30,9 @@ const RoadmapView = (() => {
       roles = CONFIG.DEFAULT_ROLES;
     }
 
+    const user = API.auth.getUser() || {};
     const urlParams = new URLSearchParams(window.location.search);
-    const preselectedRole = urlParams.get("role") || "harness-engineer";
+    const preselectedRole = urlParams.get("role") || user.target_role || "backend-engineer";
 
     selectEl.innerHTML = roles.map(role => {
       const id = role.id;
@@ -85,8 +86,9 @@ const RoadmapView = (() => {
     const timelineContainer = document.getElementById("roadmap-timeline-container");
     if (!timelineContainer) return;
 
+    const user = API.auth.getUser() || {};
     const urlParams = new URLSearchParams(window.location.search);
-    const targetRole = urlParams.get("role") || "harness-engineer";
+    const targetRole = urlParams.get("role") || user.target_role || "backend-engineer";
 
     // 1. If authenticated, check if user has existing roadmaps
     if (API.auth.isAuthenticated()) {

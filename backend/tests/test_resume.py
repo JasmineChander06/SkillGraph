@@ -211,3 +211,49 @@ def test_reject_file_exceeding_max_size(monkeypatch):
 
     assert response.status_code == 413
     assert "exceeds the maximum allowed limit" in response.json()["detail"]
+
+
+def test_update_confirmed_skills_endpoint():
+    """Verify that authenticated users can edit, add, or remove confirmed skills."""
+    import uuid
+    # 1. Register a unique user
+    email = f"skills.editor.{uuid.uuid4().hex[:8]}@example.com"
+    reg_res = client.post("/api/auth/register", json={
+        "email": email,
+        "password": "Password123!",
+        "full_name": "Skills Editor"
+    })
+    token = reg_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 2. Upload a resume
+    pdf_bytes = create_sample_pdf("Skills Editor with Python and Docker experience.")
+    upload_res = client.post(
+        "/api/resume/parse",
+        files={"file": ("resume.pdf", pdf_bytes, "application/pdf")},
+        headers=headers,
+    )
+    assert upload_res.status_code == 200
+
+    # 3. Update confirmed skills (add PostgreSQL, remove Docker)
+    updated_skills = ["Python", "PostgreSQL", "FastAPI"]
+    update_res = client.put(
+        "/api/resume/skills",
+        json={"skills": updated_skills},
+        headers=headers,
+    )
+    assert update_res.status_code == 200
+    res_data = update_res.json()
+    canonical_names = [s["canonical_name"] if isinstance(s, dict) else s for s in res_data["skills"]]
+    assert canonical_names == updated_skills
+    assert "PostgreSQL" in canonical_names
+
+    # 4. Verify record reflects updated skills
+    records_res = client.get("/api/resume/records", headers=headers)
+    assert records_res.status_code == 200
+    rec_id = records_res.json()[0]["id"]
+    detail_res = client.get(f"/api/resume/records/{rec_id}", headers=headers)
+    assert detail_res.status_code == 200
+    rec = detail_res.json()
+    rec_skills = [s["canonical_name"] if isinstance(s, dict) else s for s in rec["extracted_skills"]]
+    assert rec_skills == updated_skills

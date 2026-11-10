@@ -134,7 +134,7 @@ const App = (() => {
       modalEl.className = "modal-backdrop";
       modalEl.setAttribute("role", "dialog");
       modalEl.setAttribute("aria-modal", "true");
-      modalEl.innerHTML = `
+      modalEl.innerHTML =
         <div class="modal-card">
           <div class="modal-header">
             <div class="segmented-pill">
@@ -171,7 +171,7 @@ const App = (() => {
             JWT authenticated &bull; Salted PBKDF2 password hashing &bull; Zero plaintext retention
           </p>
         </div>
-      `;
+        ;
       document.body.appendChild(modalEl);
       authModal = modalEl;
     }

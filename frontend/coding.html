@@ -235,6 +235,73 @@
           </div>
         </div>
       </div>
+
+      <!-- 3-Tier Skill Evidence Breakdown Section -->
+      <div id="skills-breakdown-card" class="card p-8 border border-border rounded-3xl bg-card space-y-6 hidden">
+        <div class="border-b border-border pb-4">
+          <span class="eyebrow-pill">Evidence Verification</span>
+          <h3 class="font-display text-2xl mt-1">Multi-Signal Skill Verification</h3>
+          <p class="text-xs text-muted-foreground mt-1">
+            Compare skills claimed on your resume against public repository code proofs and identify unverified competencies.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- 1. Verified by GitHub -->
+          <div class="p-4 bg-secondary/50 border border-border rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase font-semibold text-emerald-700 dark:text-emerald-400">Project Proofs</span>
+              <span id="proofs-count" class="pill pill-primary text-[10px]">0 Verified</span>
+            </div>
+            <p class="text-[11px] text-muted-foreground">Skills detected directly in public repo codebases &amp; configurations:</p>
+            <div id="coding-verified-chips" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- 2. Supported by Resume -->
+          <div class="p-4 bg-secondary/50 border border-border rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase font-semibold text-foreground">Resume Claimed</span>
+              <span id="resume-count" class="pill pill-secondary text-[10px]">0 Skills</span>
+            </div>
+            <p class="text-[11px] text-muted-foreground">Competencies parsed and confirmed from your resume:</p>
+            <div id="resume-skills-chips" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <!-- 3. Needing Evidence -->
+          <div class="p-4 bg-secondary/50 border border-border rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono uppercase font-semibold text-amber-700 dark:text-amber-400">Needs Proof</span>
+              <span id="needing-count" class="pill text-[10px] bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">0 Gaps</span>
+            </div>
+            <p class="text-[11px] text-muted-foreground">Target role requirements lacking public GitHub repository evidence:</p>
+            <div id="needing-evidence-chips" class="flex flex-wrap gap-1.5 pt-1">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Public Repository Projects Grid -->
+      <div id="projects-evidence-card" class="card p-8 border border-border rounded-3xl bg-card space-y-6 hidden">
+        <div class="border-b border-border pb-4 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <span class="eyebrow-pill">Repository Portfolio</span>
+            <h3 class="font-display text-2xl mt-1">Project Evidence &amp; Demonstrated Skills</h3>
+            <p class="text-xs text-muted-foreground mt-1">
+              Public repositories demonstrating applied engineering tools and domain technologies.
+            </p>
+          </div>
+          <span id="projects-count-badge" class="pill pill-secondary text-xs font-mono">0 Repositories</span>
+        </div>
+
+        <div id="projects-evidence-grid" class="grid md:grid-cols-2 gap-4">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
     </section>
   </main>
 

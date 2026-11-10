@@ -198,6 +198,39 @@ def extract_text_from_docx(content: bytes) -> Tuple[str, int]:
         raise CorruptDocumentError("An error occurred while reading DOCX content.")
 
 
+def extract_resume_sections(text: str) -> dict[str, str]:
+    """Segment resume text into standard sections (experience, education, projects, certifications, skills)."""
+    if not text:
+        return {}
+
+    section_patterns = [
+        ("experience", r"(?:^|\n)\s*(?:work\s+experience|professional\s+experience|employment\s+history|experience)\s*[:\-\n]"),
+        ("education", r"(?:^|\n)\s*(?:education|academic\s+background|qualifications|academics)\s*[:\-\n]"),
+        ("projects", r"(?:^|\n)\s*(?:projects|technical\s+projects|personal\s+projects|key\s+projects)\s*[:\-\n]"),
+        ("certifications", r"(?:^|\n)\s*(?:certifications|certificates|licenses|courses)\s*[:\-\n]"),
+        ("skills", r"(?:^|\n)\s*(?:technical\s+skills|skills\s+and\s+technologies|core\s+competencies|skills)\s*[:\-\n]"),
+    ]
+
+    matches = []
+    for sec_name, pattern in section_patterns:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m:
+            matches.append((m.start(), sec_name))
+
+    matches.sort(key=lambda x: x[0])
+    sections: dict[str, str] = {}
+
+    for i, (start_idx, sec_name) in enumerate(matches):
+        end_idx = matches[i + 1][0] if i + 1 < len(matches) else len(text)
+        chunk = text[start_idx:end_idx].strip()
+        lines = chunk.split("\n", 1)
+        content = lines[1].strip() if len(lines) > 1 else lines[0].strip()
+        if content:
+            sections[sec_name] = content[:1500]
+
+    return sections
+
+
 def parse_resume_bytes(content: bytes, original_filename: Optional[str] = None) -> ResumeParseResponse:
     """Validate, inspect signatures, and extract plain text and safe metadata in memory.
 
@@ -277,9 +310,32 @@ def parse_resume_bytes(content: bytes, original_filename: Optional[str] = None) 
         metadata.requires_ocr,
     )
 
+    # Extract skills and categorized groups
+    skills_list: list[str] = []
+    categorized_skills: dict[str, list[str]] = {}
+    sections: dict[str, str] = {}
+
+    if success and clean_text:
+        try:
+            from app.services.skill_extractor import extract_skills
+            matches = extract_skills(clean_text)
+            skills_list = [m.canonical_name for m in matches]
+            for m in matches:
+                cat = m.category or "General"
+                if cat not in categorized_skills:
+                    categorized_skills[cat] = []
+                categorized_skills[cat].append(m.canonical_name)
+        except Exception as exc:
+            logger.debug("Skills extraction note: %s", exc)
+
+        sections = extract_resume_sections(clean_text)
+
     return ResumeParseResponse(
         success=success,
         message=message,
         text=clean_text,
         metadata=metadata,
+        skills=skills_list,
+        categorized_skills=categorized_skills,
+        sections=sections,
     )

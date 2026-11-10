@@ -1,6 +1,6 @@
 """Pydantic schemas for resume parsing requests and responses."""
 
-from typing import Optional
+from typing import Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -31,4 +31,19 @@ class ResumeParseResponse(BaseModel):
     message: str = Field(..., description="Informative status message or guidance")
     text: str = Field(default="", description="Extracted plain text from the document")
     metadata: DocumentMetadata = Field(..., description="Safe document metadata")
+    skills: List[str] = Field(default_factory=list, description="Extracted technical skill identifiers")
+    categorized_skills: Dict[str, List[str]] = Field(
+        default_factory=dict,
+        description="Skills grouped by category (Language, Framework, Database, Cloud/DevOps, Tools, AI/ML)",
+    )
+    sections: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Detected resume sections (experience, education, projects, certifications, skills)",
+    )
+
+
+class UpdateSkillsRequest(BaseModel):
+    """Payload to update confirmed skills for a resume."""
+
+    skills: List[str] = Field(..., description="List of confirmed skill names or IDs")
 

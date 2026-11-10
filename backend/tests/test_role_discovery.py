@@ -357,6 +357,34 @@ class TestRolesEndpointsIntegration:
             assert "overlap_percentage" in rel
             assert "bridge_skills" in rel
 
+    def test_compare_roles_with_user_skills_personalization(self):
+        """Verify role comparison properly computes possessed, needed, and transferable skills."""
+        res = role_discovery.compare_roles(
+            "backend-engineer",
+            "data-engineer",
+            user_skills=["Python", "SQL", "Docker", "Git"]
+        )
+        user_comp = res["user_comparison"]
+        assert user_comp["has_user_skills"] is True
+        assert user_comp["user_skills_count"] >= 4
+        assert user_comp["role_a"]["readiness_percent"] > 0
+        assert user_comp["role_b"]["readiness_percent"] > 0
+
+        # Python and SQL should be detected as transferable across both backend and data engineering
+        transferable_names = [s["canonical_name"].lower() for s in user_comp["transferable_skills"]]
+        assert any("python" in n for n in transferable_names) or any("sql" in n for n in transferable_names)
+
+    def test_compare_endpoint_with_user_skills_param(self):
+        res = client.get(
+            "/api/roles/compare?role_a=backend-engineer&role_b=data-engineer&user_skills=Python,SQL,Docker"
+        )
+        assert res.status_code == 200
+        data = res.json()
+        assert "user_comparison" in data
+        assert data["user_comparison"]["has_user_skills"] is True
+        assert len(data["user_comparison"]["role_a"]["possessed_skills"]) > 0
+        assert len(data["user_comparison"]["role_a"]["needed_skills"]) >= 0
+
     def test_market_summary_endpoint(self):
         res = client.get("/api/roles/backend-engineer/market-summary")
         assert res.status_code == 200

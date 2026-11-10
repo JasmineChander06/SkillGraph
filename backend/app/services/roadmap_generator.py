@@ -213,7 +213,16 @@ def generate_roadmap(
     known_skill_ids: Set[str] = set()
     if existing_skills:
         for s in existing_skills:
-            clean = s.strip().lower()
+            if isinstance(s, dict):
+                clean = (s.get("canonical_name") or s.get("name") or s.get("skill_id") or "").strip().lower()
+            elif isinstance(s, str):
+                clean = s.strip().lower()
+            else:
+                clean = str(s).strip().lower()
+
+            if not clean:
+                continue
+
             meta = get_skill_meta(clean)
             if meta:
                 known_skill_ids.add(clean)

@@ -166,27 +166,128 @@
     <!-- 1. KPI Stats Grid (4 Columns) -->
     <section aria-label="Key Performance Indicators" class="kpi-grid">
       <div class="card kpi-card">
-        <span class="kpi-title">Readiness</span>
+        <span class="kpi-title">Primary Target</span>
         <div id="kpi-readiness" class="kpi-value">—</div>
-        <span id="kpi-readiness-sub" class="kpi-delta">Upload resume in Resume</span>
+        <span id="kpi-readiness-sub" class="kpi-delta">Upload resume to score</span>
+      </div>
+
+      <div class="card kpi-card">
+        <span class="kpi-title">Alternative Path</span>
+        <div id="kpi-secondary-readiness" class="kpi-value">—</div>
+        <span id="kpi-secondary-readiness-sub" class="kpi-delta">Select secondary role</span>
       </div>
 
       <div class="card kpi-card">
         <span class="kpi-title">Skills tracked</span>
         <div id="kpi-skills" class="kpi-value">0</div>
-        <span id="kpi-skills-sub" class="kpi-delta">Extracted from resume</span>
+        <span id="kpi-skills-sub" class="kpi-delta">Confirmed competencies</span>
       </div>
 
       <div class="card kpi-card">
-        <span class="kpi-title">Roles compared</span>
-        <div class="kpi-value">11</div>
-        <span class="kpi-delta">Curated ontologies</span>
+        <span class="kpi-title">Roadmap progress</span>
+        <div id="kpi-roadmaps" class="kpi-value">0%</div>
+        <span id="kpi-roadmaps-sub" class="kpi-delta">0 tasks completed</span>
+      </div>
+    </section>
+
+    <!-- 1b. Dual Target Roles Side-by-Side Comparison Card -->
+    <section id="two-role-summary-card" class="card hidden" style="margin-bottom: 2.5rem; padding: 1.75rem 2rem; background: var(--card); border: 1.5px solid var(--border);">
+      <div class="flex items-center justify-between" style="margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+        <div>
+          <span class="eyebrow-pill">Dual Career Targets</span>
+          <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-top: 0.35rem;">Primary vs. Alternative Role Alignment</h2>
+        </div>
+        <a id="two-role-compare-link" href="roles.html" class="btn btn-outline btn-sm">
+          Deep role comparison &rarr;
+        </a>
       </div>
 
-      <div class="card kpi-card">
-        <span class="kpi-title">Active roadmaps</span>
-        <div id="kpi-roadmaps" class="kpi-value">0</div>
-        <span class="kpi-delta">6-week curriculum</span>
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; align-items: stretch;">
+        <!-- Primary Role Summary -->
+        <div style="background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem;">
+          <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+            <span class="eyebrow-pill" style="font-size: 0.68rem;">Primary Role</span>
+            <span id="role-a-score-pill" style="font-family: var(--font-mono); font-weight: 700; font-size: 1.2rem; color: #059669;">0%</span>
+          </div>
+          <h3 id="role-a-name" style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem;">—</h3>
+          <div class="progress-track" style="margin-bottom: 0.75rem;">
+            <div id="role-a-progress-fill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <p id="role-a-skills-summary" style="font-size: 0.8rem; color: var(--muted-foreground);">
+            0 core skills matched
+          </p>
+        </div>
+
+        <!-- Secondary Role Summary -->
+        <div style="background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem;">
+          <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+            <span class="eyebrow-pill" style="font-size: 0.68rem;">Secondary Alternative</span>
+            <span id="role-b-score-pill" style="font-family: var(--font-mono); font-weight: 700; font-size: 1.2rem; color: oklch(0.45 0.12 60);">0%</span>
+          </div>
+          <h3 id="role-b-name" style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem;">—</h3>
+          <div class="progress-track" style="margin-bottom: 0.75rem;">
+            <div id="role-b-progress-fill" class="progress-fill" style="width: 0%;"></div>
+          </div>
+          <p id="role-b-skills-summary" style="font-size: 0.8rem; color: var(--muted-foreground);">
+            0 core skills matched
+          </p>
+        </div>
+
+        <!-- Role Overlap & Bridge Summary -->
+        <div style="background: var(--secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div class="flex items-center justify-between" style="margin-bottom: 0.5rem;">
+              <span class="eyebrow-pill" style="font-size: 0.68rem;">Skill Intersect</span>
+              <span id="two-role-overlap-pct" style="font-family: var(--font-mono); font-weight: 700; font-size: 1.2rem;">0%</span>
+            </div>
+            <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem;">Transferable Skills</h3>
+            <p id="two-role-transfer-desc" style="font-size: 0.82rem; color: var(--muted-foreground); line-height: 1.45;">
+              Select two roles on the Roles page to view overlapping competencies and transition effort.
+            </p>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <span id="two-role-bridge-hours" class="eyebrow-pill" style="background: var(--background);">~0h transition bridge</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1c. Category Coverage & High-Priority Gaps Grid -->
+    <section id="category-and-gaps-section" class="grid hidden" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+      <!-- Skill Coverage by Category -->
+      <div class="card" style="padding: 1.75rem;">
+        <span class="eyebrow-pill">Taxonomy Coverage</span>
+        <h2 style="font-family: var(--font-display); font-size: 1.35rem; margin-top: 0.35rem; margin-bottom: 1.25rem;">
+          Skill Coverage by Category
+        </h2>
+        <div id="category-coverage-list" style="display: flex; flex-direction: column; gap: 0.85rem;">
+          <!-- Populated dynamically by dashboard.js -->
+        </div>
+      </div>
+
+      <!-- Matched vs High-Priority Missing Skills -->
+      <div class="card" style="padding: 1.75rem;">
+        <span class="eyebrow-pill">Gap Prioritization</span>
+        <h2 style="font-family: var(--font-display); font-size: 1.35rem; margin-top: 0.35rem; margin-bottom: 1.25rem;">
+          Target Role Priority Gaps
+        </h2>
+        <div style="margin-bottom: 1rem;">
+          <h4 style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #059669; margin-bottom: 0.5rem;">
+            Matched Competencies (<span id="matched-skills-count">0</span>)
+          </h4>
+          <div id="matched-skills-container" class="flex flex-wrap gap-1" style="max-height: 120px; overflow-y: auto;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <div>
+          <h4 style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: oklch(0.45 0.12 60); margin-bottom: 0.5rem;">
+            Critical Missing Skills (<span id="missing-skills-count">0</span>)
+          </h4>
+          <div id="missing-skills-container" class="flex flex-wrap gap-1" style="max-height: 140px; overflow-y: auto;">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
       </div>
     </section>
 

@@ -336,7 +336,11 @@ def get_related_roles(role_id: str, top_n: int = 4) -> List[Dict[str, Any]]:
     return candidates[:top_n]
 
 
-def compare_roles(role_a_id: str, role_b_id: str) -> Dict[str, Any]:
+def compare_roles(
+    role_a_id: str,
+    role_b_id: str,
+    user_skills: Optional[List[str]] = None,
+) -> Dict[str, Any]:
     """
     Perform full bidirectional comparison between two roles:
     * Shared core skills
@@ -346,6 +350,7 @@ def compare_roles(role_a_id: str, role_b_id: str) -> Dict[str, Any]:
     * Transition bridge from A -> B (skills to learn, estimated hours)
     * Transition bridge from B -> A (skills to learn, estimated hours)
     * Seniority, accessibility, and maturity distinctions
+    * User-specific skill match, possessed vs missing, and transferable skills (if user_skills provided)
     """
     prof_a = skill_analyzer.get_role(role_a_id)
     prof_b = skill_analyzer.get_role(role_b_id)
@@ -385,6 +390,34 @@ def compare_roles(role_a_id: str, role_b_id: str) -> Dict[str, Any]:
     meta_a = ROLE_MATURITY_REGISTRY.get(role_a_id, {"maturity": "emerging", "entry_level_accessible": False})
     meta_b = ROLE_MATURITY_REGISTRY.get(role_b_id, {"maturity": "emerging", "entry_level_accessible": False})
 
+    # User personalized skill alignment
+    user_skill_set: Set[str] = set()
+    if user_skills:
+        for item in user_skills:
+            if isinstance(item, str) and item.strip():
+                user_skill_set.add(item.strip().lower())
+
+    def _is_possessed(sid: str) -> bool:
+        meta = get_skill_meta(sid)
+        canonical = meta.get("canonical", sid.replace("_", " ")).lower()
+        if sid.lower() in user_skill_set or canonical in user_skill_set:
+            return True
+        for alias in meta.get("aliases", []):
+            if alias.lower() in user_skill_set:
+                return True
+        return False
+
+    possessed_a = [enrich_skill_object(s) for s in sorted(core_a) if _is_possessed(s)]
+    needed_a = [enrich_skill_object(s) for s in sorted(core_a) if not _is_possessed(s)]
+    readiness_a = round(len(possessed_a) / len(core_a) * 100, 1) if core_a else 0.0
+
+    possessed_b = [enrich_skill_object(s) for s in sorted(core_b) if _is_possessed(s)]
+    needed_b = [enrich_skill_object(s) for s in sorted(core_b) if not _is_possessed(s)]
+    readiness_b = round(len(possessed_b) / len(core_b) * 100, 1) if core_b else 0.0
+
+    transferable_skills = [enrich_skill_object(s) for s in sorted(shared_core) if _is_possessed(s)]
+    high_leverage_skills = [enrich_skill_object(s) for s in sorted(shared_core) if not _is_possessed(s)]
+
     return {
         "role_a": {
             "id": role_a_id,
@@ -421,6 +454,22 @@ def compare_roles(role_a_id: str, role_b_id: str) -> Dict[str, Any]:
             "bridge_skills": bridge_b_to_a,
             "bridge_skills_count": len(bridge_b_to_a),
             "estimated_hours": hours_b_to_a,
+        },
+        "user_comparison": {
+            "has_user_skills": len(user_skill_set) > 0,
+            "user_skills_count": len(user_skill_set),
+            "role_a": {
+                "possessed_skills": possessed_a,
+                "needed_skills": needed_a,
+                "readiness_percent": readiness_a,
+            },
+            "role_b": {
+                "possessed_skills": possessed_b,
+                "needed_skills": needed_b,
+                "readiness_percent": readiness_b,
+            },
+            "transferable_skills": transferable_skills,
+            "high_leverage_skills": high_leverage_skills,
         },
     }
 

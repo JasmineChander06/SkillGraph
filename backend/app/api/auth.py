@@ -44,8 +44,10 @@ def _build_token_response(user: User) -> TokenResponse:
         career_interests=user.career_interests,
         skill_level=user.skill_level,
         target_role=user.target_role,
+        secondary_role=user.secondary_role,
         github_username=user.github_username,
         leetcode_username=user.leetcode_username,
+        coding_signal_json=user.coding_signal_json,
         onboarding_completed=user.onboarding_completed,
         is_active=user.is_active,
         created_at=user.created_at,
@@ -149,8 +151,10 @@ async def get_me(
         career_interests=current_user.career_interests,
         skill_level=current_user.skill_level,
         target_role=current_user.target_role,
+        secondary_role=current_user.secondary_role,
         github_username=current_user.github_username,
         leetcode_username=current_user.leetcode_username,
+        coding_signal_json=current_user.coding_signal_json,
         onboarding_completed=current_user.onboarding_completed,
         is_active=current_user.is_active,
         created_at=current_user.created_at,
@@ -186,6 +190,8 @@ async def save_onboarding(
         current_user.skill_level = payload.skill_level.strip()
     if payload.target_role is not None:
         current_user.target_role = payload.target_role.strip()
+    if payload.secondary_role is not None:
+        current_user.secondary_role = payload.secondary_role.strip()
 
     current_user.onboarding_completed = True
     db.commit()
@@ -201,8 +207,10 @@ async def save_onboarding(
         career_interests=current_user.career_interests,
         skill_level=current_user.skill_level,
         target_role=current_user.target_role,
+        secondary_role=current_user.secondary_role,
         github_username=current_user.github_username,
         leetcode_username=current_user.leetcode_username,
+        coding_signal_json=current_user.coding_signal_json,
         onboarding_completed=current_user.onboarding_completed,
         is_active=current_user.is_active,
         created_at=current_user.created_at,
@@ -228,8 +236,10 @@ async def get_onboarding(
         career_interests=current_user.career_interests,
         skill_level=current_user.skill_level,
         target_role=current_user.target_role,
+        secondary_role=current_user.secondary_role,
         github_username=current_user.github_username,
         leetcode_username=current_user.leetcode_username,
+        coding_signal_json=current_user.coding_signal_json,
         onboarding_completed=current_user.onboarding_completed,
         is_active=current_user.is_active,
         created_at=current_user.created_at,
@@ -258,6 +268,8 @@ async def update_profile(
         current_user.skill_level = payload.skill_level.strip() or None
     if payload.target_role is not None:
         current_user.target_role = payload.target_role.strip() or None
+    if payload.secondary_role is not None:
+        current_user.secondary_role = payload.secondary_role.strip() or None
 
     db.commit()
     db.refresh(current_user)
@@ -270,8 +282,10 @@ async def update_profile(
         career_interests=current_user.career_interests,
         skill_level=current_user.skill_level,
         target_role=current_user.target_role,
+        secondary_role=current_user.secondary_role,
         github_username=current_user.github_username,
         leetcode_username=current_user.leetcode_username,
+        coding_signal_json=current_user.coding_signal_json,
         onboarding_completed=current_user.onboarding_completed,
         is_active=current_user.is_active,
         created_at=current_user.created_at,

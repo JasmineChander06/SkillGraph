@@ -130,6 +130,54 @@ def test_combined_profiles_analysis():
     anyio.run(run)
 
 
+def test_github_project_evidence_and_three_tier_breakdown():
+    """Verify repo projects demonstrated skills and 3-tier competency breakdown."""
+    async def run():
+        def mock_handler(request: httpx.Request):
+            url = str(request.url)
+            if "/users/alice/repos" in url:
+                return httpx.Response(200, json=[
+                    {
+                        "name": "fastapi-service",
+                        "description": "Production REST API built with FastAPI, Docker, and PostgreSQL",
+                        "language": "Python",
+                        "topics": ["fastapi", "docker", "postgresql"],
+                        "stargazers_count": 10,
+                        "html_url": "https://github.com/alice/fastapi-service",
+                    }
+                ])
+            elif "/users/alice" in url:
+                return httpx.Response(200, json={
+                    "login": "alice",
+                    "public_repos": 1,
+                    "followers": 5,
+                })
+            return httpx.Response(404)
+
+        mock_transport = httpx.MockTransport(mock_handler)
+        async with httpx.AsyncClient(transport=mock_transport) as mock_client:
+            report = await analyze_coding_profiles(
+                github_username="alice",
+                user_skills=["Python", "Git", "SQL"],
+                target_role="backend-engineer",
+                client=mock_client,
+            )
+
+        assert report.github is not None
+        assert len(report.github.top_projects) == 1
+        proj = report.github.top_projects[0]
+        assert proj.name == "fastapi-service"
+        assert any("python" in s.lower() or "fastapi" in s.lower() for s in proj.demonstrated_skills)
+
+        # 3-tier breakdown check
+        assert report.skills_breakdown is not None
+        assert "Python" in report.skills_breakdown.resume_skills
+        assert len(report.skills_breakdown.coding_verified_skills) > 0
+        assert isinstance(report.skills_breakdown.skills_needing_evidence, list)
+
+    anyio.run(run)
+
+
 def test_api_profiles_endpoint_empty_payload_returns_422():
     """POST /api/profiles/analyze with neither username must return 422."""
     response = client.post("/api/profiles/analyze", json={})

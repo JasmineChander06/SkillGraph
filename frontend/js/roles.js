@@ -528,23 +528,59 @@ const RolesView = (() => {
     selectA.innerHTML = optionsHtml;
     selectB.innerHTML = optionsHtml;
 
-    // Set defaults: backend-engineer vs data-engineer (or second item)
-    if (roles.length > 1) {
-      selectA.value = roles[0].id;
-      selectB.value = roles[1].id;
+    const user = API.auth.getUser() || {};
+    const defaultA = user.target_role || (roles.length > 0 ? roles[0].id : "backend-engineer");
+    const defaultB = user.secondary_role || (roles.length > 1 ? roles[1].id : "data-engineer");
+
+    selectA.value = defaultA;
+    selectB.value = (defaultB !== defaultA) ? defaultB : (roles[1] ? roles[1].id : roles[0].id);
+
+    // Automatically compute comparison on initial load
+    if (selectA.value && selectB.value) {
+      runRoleComparison(selectA.value, selectB.value);
     }
   };
 
   /**
-   * Setup comparison submit handler
+   * Setup comparison submit handler & Save Roles handler
    */
   const setupComparisonForm = () => {
     const runBtn = document.getElementById("compare-run-btn");
+    const saveRolesBtn = document.getElementById("compare-save-roles-btn");
+
     runBtn?.addEventListener("click", () => {
       const roleA = document.getElementById("compare-select-a")?.value;
       const roleB = document.getElementById("compare-select-b")?.value;
       if (roleA && roleB) {
         runRoleComparison(roleA, roleB);
+      }
+    });
+
+    saveRolesBtn?.addEventListener("click", async () => {
+      const roleA = document.getElementById("compare-select-a")?.value;
+      const roleB = document.getElementById("compare-select-b")?.value;
+      if (!roleA || !roleB) return;
+
+      if (saveRolesBtn) {
+        saveRolesBtn.disabled = true;
+        saveRolesBtn.textContent = "Saving…";
+      }
+
+      try {
+        await API.user.updateProfile({ target_role: roleA, secondary_role: roleB });
+        const user = API.auth.getUser() || {};
+        user.target_role = roleA;
+        user.secondary_role = roleB;
+        localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+        localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_ROLE, roleA);
+        App.showToast("Saved target roles to your profile. Dashboard updated.", "success");
+      } catch (err) {
+        App.showToast(err.message || "Failed to save selected roles.", "error");
+      } finally {
+        if (saveRolesBtn) {
+          saveRolesBtn.disabled = false;
+          saveRolesBtn.textContent = "Save selected roles";
+        }
       }
     });
   };
@@ -598,6 +634,117 @@ const RolesView = (() => {
         </span>
       `).join("") || `<span style="font-size:0.8rem; color:#059669;">Seamless transition &bull; Zero missing core skills</span>`;
 
+      // User personalized comparison block
+      const userComp = data.user_comparison || {};
+      let userSectionHtml = "";
+
+      if (userComp.has_user_skills) {
+        const uRoleA = userComp.role_a || {};
+        const uRoleB = userComp.role_b || {};
+        const transferable = userComp.transferable_skills || [];
+        const highLeverage = userComp.high_leverage_skills || [];
+
+        const possessedAHtml = (uRoleA.possessed_skills || []).map(s => `
+          <span class="skill-tag" style="background:oklch(0.95 0.05 145); color:#059669; border-color:#059669;">${App.escapeHtml(s.canonical_name)}</span>
+        `).join("") || `<span style="font-size:0.8rem; color:var(--muted-foreground);">No core skills possessed yet</span>`;
+
+        const neededAHtml = (uRoleA.needed_skills || []).map(s => `
+          <span class="skill-tag missing">${App.escapeHtml(s.canonical_name)} (~${s.estimated_hours}h)</span>
+        `).join("") || `<span style="font-size:0.8rem; color:#059669;">All core skills verified!</span>`;
+
+        const possessedBHtml = (uRoleB.possessed_skills || []).map(s => `
+          <span class="skill-tag" style="background:oklch(0.95 0.05 145); color:#059669; border-color:#059669;">${App.escapeHtml(s.canonical_name)}</span>
+        `).join("") || `<span style="font-size:0.8rem; color:var(--muted-foreground);">No core skills possessed yet</span>`;
+
+        const neededBHtml = (uRoleB.needed_skills || []).map(s => `
+          <span class="skill-tag missing">${App.escapeHtml(s.canonical_name)} (~${s.estimated_hours}h)</span>
+        `).join("") || `<span style="font-size:0.8rem; color:#059669;">All core skills verified!</span>`;
+
+        const transferableHtml = transferable.map(s => `
+          <span class="skill-tag" style="background:oklch(0.95 0.05 145); color:#059669; border-color:#059669;">${App.escapeHtml(s.canonical_name)} &check;</span>
+        `).join("") || `<span style="font-size:0.8rem; color:var(--muted-foreground);">None yet</span>`;
+
+        const highLeverageHtml = highLeverage.map(s => `
+          <span class="skill-tag" style="background:oklch(0.95 0.06 70); color:oklch(0.40 0.12 60); border-color:oklch(0.75 0.12 70);">${App.escapeHtml(s.canonical_name)} (~${s.estimated_hours}h)</span>
+        `).join("") || `<span style="font-size:0.8rem; color:#059669;">All shared core skills verified!</span>`;
+
+        userSectionHtml = `
+          <!-- Authenticated User Personal Alignment -->
+          <div style="background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-md); padding:1.75rem; margin-top:2rem; margin-bottom:2rem; box-shadow:var(--shadow-sm);">
+            <div class="flex items-center justify-between" style="margin-bottom:1.25rem; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <span class="eyebrow-pill" style="background:var(--accent); color:var(--background);">Your Personal Alignment</span>
+                <h4 style="font-family:var(--font-display); font-size:1.35rem; margin-top:0.35rem;">
+                  Your readiness against both target paths
+                </h4>
+              </div>
+              <button id="inline-save-roles-btn" class="btn btn-outline btn-sm" type="button">
+                Set as active profile targets
+              </button>
+            </div>
+
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.25rem; margin-bottom:1.5rem;">
+              <!-- Role A Personal Match -->
+              <div class="bridge-box">
+                <div class="flex items-center justify-between" style="margin-bottom:0.5rem;">
+                  <strong style="font-size:0.95rem;">${App.escapeHtml(data.role_a.canonical_title)}</strong>
+                  <span style="font-family:var(--font-mono); font-weight:700; font-size:1.25rem; color:#059669;">${uRoleA.readiness_percent}%</span>
+                </div>
+                <div class="progress-track" style="margin-bottom:0.75rem;">
+                  <div class="progress-fill" style="width:${uRoleA.readiness_percent}%;"></div>
+                </div>
+                <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:#059669; margin-bottom:0.35rem;">
+                  Possessed (${(uRoleA.possessed_skills || []).length}):
+                </div>
+                <div class="flex flex-wrap gap-1" style="margin-bottom:0.75rem;">${possessedAHtml}</div>
+                <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:oklch(0.45 0.12 60); margin-bottom:0.35rem;">
+                  Still to Develop (${(uRoleA.needed_skills || []).length}):
+                </div>
+                <div class="flex flex-wrap gap-1">${neededAHtml}</div>
+              </div>
+
+              <!-- Role B Personal Match -->
+              <div class="bridge-box">
+                <div class="flex items-center justify-between" style="margin-bottom:0.5rem;">
+                  <strong style="font-size:0.95rem;">${App.escapeHtml(data.role_b.canonical_title)}</strong>
+                  <span style="font-family:var(--font-mono); font-weight:700; font-size:1.25rem; color:#059669;">${uRoleB.readiness_percent}%</span>
+                </div>
+                <div class="progress-track" style="margin-bottom:0.75rem;">
+                  <div class="progress-fill" style="width:${uRoleB.readiness_percent}%;"></div>
+                </div>
+                <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:#059669; margin-bottom:0.35rem;">
+                  Possessed (${(uRoleB.possessed_skills || []).length}):
+                </div>
+                <div class="flex flex-wrap gap-1" style="margin-bottom:0.75rem;">${possessedBHtml}</div>
+                <div style="font-size:0.8rem; font-weight:600; text-transform:uppercase; color:oklch(0.45 0.12 60); margin-bottom:0.35rem;">
+                  Still to Develop (${(uRoleB.needed_skills || []).length}):
+                </div>
+                <div class="flex flex-wrap gap-1">${neededBHtml}</div>
+              </div>
+            </div>
+
+            <!-- Transferable and High-Leverage Skills -->
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:1rem;">
+              <div style="padding:1rem; background:var(--secondary); border:1px solid var(--border); border-radius:var(--radius-sm);">
+                <span class="eyebrow-pill" style="color:#059669; border-color:#059669; margin-bottom:0.5rem;">Transferable Competencies</span>
+                <p style="font-size:0.8rem; color:var(--muted-foreground); margin-bottom:0.6rem;">
+                  Skills you already have that transfer immediately across both paths:
+                </p>
+                <div class="flex flex-wrap gap-1">${transferableHtml}</div>
+              </div>
+
+              <div style="padding:1rem; background:var(--secondary); border:1px solid var(--border); border-radius:var(--radius-sm);">
+                <span class="eyebrow-pill" style="color:oklch(0.45 0.12 60); border-color:oklch(0.75 0.12 70); margin-bottom:0.5rem;">High-Leverage Growth Skills</span>
+                <p style="font-size:0.8rem; color:var(--muted-foreground); margin-bottom:0.6rem;">
+                  Skills required by BOTH roles that you still need to learn (closes gaps in both simultaneously):
+                </p>
+                <div class="flex flex-wrap gap-1">${highLeverageHtml}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       resultsContainer.innerHTML = `
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
           <!-- Comparison Summary Header -->
@@ -622,6 +769,8 @@ const RolesView = (() => {
           <div class="progress-track thick" style="margin-bottom: 1.75rem;">
             <div class="progress-fill" style="width: ${data.overlap_percentage}%;"></div>
           </div>
+
+          ${userSectionHtml}
 
           <!-- 3-Column Skill Breakdown -->
           <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -703,6 +852,21 @@ const RolesView = (() => {
         </div>
       `;
 
+      // Attach inline save roles listener if rendered
+      document.getElementById("inline-save-roles-btn")?.addEventListener("click", async () => {
+        try {
+          await API.user.updateProfile({ target_role: roleA, secondary_role: roleB });
+          const user = API.auth.getUser() || {};
+          user.target_role = roleA;
+          user.secondary_role = roleB;
+          localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+          localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_ROLE, roleA);
+          App.showToast("Saved target roles to your profile. Dashboard updated.", "success");
+        } catch (err) {
+          App.showToast(err.message || "Failed to save selected roles.", "error");
+        }
+      });
+
     } catch (err) {
       resultsContainer.innerHTML = `
         <div class="alert-box error" style="margin-top:1.5rem;">
@@ -712,7 +876,7 @@ const RolesView = (() => {
     } finally {
       if (runBtn) {
         runBtn.disabled = false;
-        runBtn.textContent = "Calculate skill overlap →";
+        runBtn.textContent = "Compare requirements →";
       }
     }
   };

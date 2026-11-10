@@ -63,8 +63,10 @@ class UserResponse(BaseModel):
     career_interests: Optional[str] = Field(None, description="Career interests.")
     skill_level: Optional[str] = Field(None, description="Skill level.")
     target_role: Optional[str] = Field(None, description="Target role ID.")
+    secondary_role: Optional[str] = Field(None, description="Secondary/comparison target role ID.")
     github_username: Optional[str] = Field(None, description="GitHub username.")
     leetcode_username: Optional[str] = Field(None, description="LeetCode username.")
+    coding_signal_json: Optional[str] = Field(None, description="Persisted coding profile signal JSON.")
     onboarding_completed: bool = Field(False, description="Whether onboarding has been completed.")
     is_active: bool = Field(True, description="Account active status.")
     created_at: Optional[datetime] = Field(None, description="Timestamp of registration.")
@@ -80,6 +82,7 @@ class UserOnboardingRequest(BaseModel):
     career_interests: Optional[str] = Field(None, description="Career interests.")
     skill_level: Optional[str] = Field(None, description="Current skill level, if provided.")
     target_role: Optional[str] = Field(None, description="Initial target role ID.")
+    secondary_role: Optional[str] = Field(None, description="Secondary/comparison target role ID.")
 
 
 class TokenResponse(BaseModel):

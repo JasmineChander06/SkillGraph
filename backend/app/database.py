@@ -78,10 +78,14 @@ def init_db(bind_engine=None) -> None:
                     conn.execute(text("ALTER TABLE users ADD COLUMN skill_level VARCHAR(50)"))
                 if "target_role" not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN target_role VARCHAR(100)"))
+                if "secondary_role" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN secondary_role VARCHAR(100)"))
                 if "github_username" not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN github_username VARCHAR(100)"))
                 if "leetcode_username" not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN leetcode_username VARCHAR(100)"))
+                if "coding_signal_json" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN coding_signal_json TEXT"))
                 if "onboarding_completed" not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN onboarding_completed BOOLEAN DEFAULT 0"))
                 conn.commit()

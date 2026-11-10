@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import json
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.models.resume import ResumeRecord
+from app.models.user import User
 from app.services import market_insights, role_discovery
+from app.services.auth import get_optional_current_user
 
 router = APIRouter(prefix="/api/roles", tags=["Roles"])
 
@@ -37,6 +41,9 @@ async def list_roles(
 async def compare_roles(
     role_a: str = Query(..., description="First role ID to compare"),
     role_b: str = Query(..., description="Second role ID to compare"),
+    user_skills: Optional[str] = Query(None, description="Comma-separated user skills (e.g. 'python,sql,docker')"),
+    current_user: Optional[User] = Depends(get_optional_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Perform bidirectional comparative analysis between two roles:
@@ -45,12 +52,30 @@ async def compare_roles(
     * Jaccard overlap similarity index
     * Transition bridge skills and estimated hours in both directions
     * Seniority, accessibility, and emerging title nuances
+    * Automatically computes personal skill match and transferable competencies if user is authenticated or provides skills.
     """
     if not role_a or not role_b:
         raise HTTPException(status_code=422, detail="Both 'role_a' and 'role_b' parameters are required.")
 
+    skills_list: Optional[List[str]] = None
+    if user_skills:
+        skills_list = [s.strip() for s in user_skills.split(",") if s.strip()]
+    elif current_user:
+        # Load user's latest active resume record
+        resume = (
+            db.query(ResumeRecord)
+            .filter(ResumeRecord.user_id == current_user.id, ResumeRecord.is_deleted == False)
+            .order_by(ResumeRecord.created_at.desc())
+            .first()
+        )
+        if resume and resume.extracted_skills_json:
+            try:
+                skills_list = json.loads(resume.extracted_skills_json)
+            except Exception:
+                skills_list = None
+
     try:
-        comparison = role_discovery.compare_roles(role_a, role_b)
+        comparison = role_discovery.compare_roles(role_a, role_b, user_skills=skills_list)
         return comparison
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
