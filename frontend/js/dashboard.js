@@ -606,7 +606,7 @@ const Dashboard = (() => {
           matchedCount++;
         }
       });
-      const youScore = Math.min(95, Math.max(20, matchedCount * 25));
+      const youScore = matchedCount === 0 ? 0 : Math.min(100, matchedCount * 25);
       return { label, you: youScore, target: 80 };
     });
 

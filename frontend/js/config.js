@@ -17,13 +17,13 @@ const CONFIG = {
     LATEST_ROADMAP_ID: "sg_latest_roadmap_id"
   },
 
-  // Default target role list if offline
+  // Default target role list if offline (metadata only, no fake readiness scores)
   DEFAULT_ROLES: [
-    { id: "harness-engineer", title: "Harness Engineer", readiness: 74 },
-    { id: "backend-engineer", title: "Backend Engineer", readiness: 82 },
-    { id: "machine-learning-engineer", title: "Machine Learning Engineer", readiness: 71 },
-    { id: "data-engineer", title: "Data Engineer", readiness: 68 },
-    { id: "llmops-engineer", title: "LLMOps Engineer", readiness: 65 }
+    { id: "harness-engineer", title: "Harness Engineer" },
+    { id: "backend-engineer", title: "Backend Engineer" },
+    { id: "machine-learning-engineer", title: "Machine Learning Engineer" },
+    { id: "data-engineer", title: "Data Engineer" },
+    { id: "llmops-engineer", title: "LLMOps Engineer" }
   ]
 };
 

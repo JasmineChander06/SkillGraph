@@ -396,6 +396,10 @@ def compare_roles(
         for item in user_skills:
             if isinstance(item, str) and item.strip():
                 user_skill_set.add(item.strip().lower())
+            elif isinstance(item, dict):
+                canonical = item.get("canonical_name") or item.get("name") or item.get("skill_id") or ""
+                if canonical and str(canonical).strip():
+                    user_skill_set.add(str(canonical).strip().lower())
 
     def _is_possessed(sid: str) -> bool:
         meta = get_skill_meta(sid)

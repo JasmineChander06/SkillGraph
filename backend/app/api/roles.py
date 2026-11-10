@@ -65,12 +65,20 @@ async def compare_roles(
         resume = (
             db.query(ResumeRecord)
             .filter(ResumeRecord.user_id == current_user.id, ResumeRecord.is_deleted == False)
-            .order_by(ResumeRecord.created_at.desc())
+            .order_by(ResumeRecord.id.desc())
             .first()
         )
         if resume and resume.extracted_skills_json:
             try:
-                skills_list = json.loads(resume.extracted_skills_json)
+                raw_skills = json.loads(resume.extracted_skills_json)
+                skills_list = []
+                for s in raw_skills:
+                    if isinstance(s, dict):
+                        val = s.get("canonical_name") or s.get("name") or s.get("skill_id")
+                        if val:
+                            skills_list.append(str(val))
+                    elif isinstance(s, str):
+                        skills_list.append(s)
             except Exception:
                 skills_list = None
 
