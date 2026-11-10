@@ -95,8 +95,16 @@ const ResumeReviewView = (() => {
             if (counter) counter.textContent = `${resp.text.length.toLocaleString()} characters`;
           }
 
-          currentSkills = resp.skills || [];
+          const rawSkills = resp.skills || [];
+          currentSkills = rawSkills.map(normalizeSkillName).filter(Boolean);
           renderSkillsChips(currentSkills);
+
+          // Auto-persist extracted skills to user database record so Dashboard immediately reflects them!
+          try {
+            await API.resume.updateSkills(currentSkills);
+          } catch (syncErr) {
+            console.warn("Auto-syncing skills to database:", syncErr);
+          }
 
           if (statusText) statusText.textContent = `Parsed ${currentSkills.length} skills successfully`;
           App.showToast(`Extracted ${currentSkills.length} skills from ${selectedFile.name}.`, "success");
@@ -116,6 +124,17 @@ const ResumeReviewView = (() => {
   };
 
   /**
+   * Safe skill name normalizer: converts both dicts and strings into clean display names
+   */
+  const normalizeSkillName = (s) => {
+    if (!s) return "";
+    if (typeof s === "object") {
+      return s.canonical_name || s.name || s.skill_id || "";
+    }
+    return String(s).trim();
+  };
+
+  /**
    * Extracted Skills Chips & Custom Skill Management
    */
   const setupSkillsManager = () => {
@@ -124,14 +143,18 @@ const ResumeReviewView = (() => {
     const confirmBtn = document.getElementById("btn-confirm-skills");
 
     const addSkill = () => {
-      const skill = customInput?.value.trim().toLowerCase();
+      const raw = customInput?.value.trim();
+      if (!raw) return;
+
+      const skill = normalizeSkillName(raw);
       if (!skill) return;
 
-      if (!currentSkills.includes(skill)) {
+      const alreadyExists = currentSkills.some(s => s.toLowerCase() === skill.toLowerCase());
+      if (!alreadyExists) {
         currentSkills.push(skill);
         renderSkillsChips(currentSkills);
-        customInput.value = "";
-        App.showToast(`Added "${skill}" to your skills.`, "info");
+        if (customInput) customInput.value = "";
+        App.showToast(`Added "${skill}". Click "Confirm & Save Skills" to persist.`, "info");
       } else {
         App.showToast(`"${skill}" is already in your skills list.`, "info");
       }
@@ -145,24 +168,37 @@ const ResumeReviewView = (() => {
       }
     });
 
-    confirmBtn?.addEventListener("click", () => {
-      const user = API.auth.getUser();
-      if (user && user.id) {
-        localStorage.setItem(`sg_skills_reviewed_${user.id}`, "true");
-      } else {
-        localStorage.setItem("sg_skills_reviewed", "true");
-      }
-      App.showToast("Skills verified! You can now explore roles or view your dashboard.", "success");
-      
-      const count = currentSkills.length;
-      confirmBtn.textContent = "✓ Skills Confirmed";
-      confirmBtn.classList.remove("btn-primary");
-      confirmBtn.classList.add("btn-outline");
-      setTimeout(() => {
+    confirmBtn?.addEventListener("click", async () => {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = "Saving to database…";
+
+      try {
+        // Persist confirmed skills to backend database via PUT /api/resume/skills
+        await API.resume.updateSkills(currentSkills);
+
+        const user = API.auth.getUser();
+        if (user && user.id) {
+          localStorage.setItem(`sg_skills_reviewed_${user.id}`, "true");
+        } else {
+          localStorage.setItem("sg_skills_reviewed", "true");
+        }
+
+        App.showToast(`Saved ${currentSkills.length} skills to your account! Dashboard updated.`, "success");
+
+        confirmBtn.textContent = "✓ Skills Saved to Profile";
+        confirmBtn.classList.remove("btn-primary");
+        confirmBtn.classList.add("btn-outline");
+        setTimeout(() => {
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = "Confirm & Save Skills →";
+          confirmBtn.classList.add("btn-primary");
+          confirmBtn.classList.remove("btn-outline");
+        }, 3000);
+      } catch (err) {
+        App.showToast(err.message || "Failed to save skills to database.", "error");
+        confirmBtn.disabled = false;
         confirmBtn.textContent = "Confirm & Save Skills →";
-        confirmBtn.classList.add("btn-primary");
-        confirmBtn.classList.remove("btn-outline");
-      }, 3000);
+      }
     });
   };
 
@@ -171,16 +207,19 @@ const ResumeReviewView = (() => {
     const countBadge = document.getElementById("skills-count-badge");
     if (!container) return;
 
+    // Normalize incoming items
+    currentSkills = (skills || []).map(normalizeSkillName).filter(Boolean);
+
     if (countBadge) {
-      countBadge.textContent = `${skills.length} ${skills.length === 1 ? "Skill" : "Skills"}`;
+      countBadge.textContent = `${currentSkills.length} ${currentSkills.length === 1 ? "Skill" : "Skills"}`;
     }
 
-    if (!skills || skills.length === 0) {
+    if (currentSkills.length === 0) {
       container.innerHTML = `<span class="text-xs text-muted-foreground italic self-center">No skills extracted yet. Upload a resume above.</span>`;
       return;
     }
 
-    container.innerHTML = skills.map((skill, idx) => `
+    container.innerHTML = currentSkills.map((skill, idx) => `
       <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono bg-secondary border border-border text-foreground transition-all hover:border-foreground/30">
         <span>${App.escapeHtml(skill)}</span>
         <button type="button" class="text-muted-foreground hover:text-rose-600 font-bold ml-0.5 focus:outline-none" title="Remove skill" data-index="${idx}">
@@ -196,7 +235,7 @@ const ResumeReviewView = (() => {
         if (!isNaN(idx) && idx >= 0 && idx < currentSkills.length) {
           const removed = currentSkills.splice(idx, 1)[0];
           renderSkillsChips(currentSkills);
-          App.showToast(`Removed "${removed}".`, "info");
+          App.showToast(`Removed "${removed}". Click "Confirm & Save Skills" to persist.`, "info");
         }
       });
     });
@@ -220,7 +259,7 @@ const ResumeReviewView = (() => {
           }
 
           if (latest.extracted_skills && latest.extracted_skills.length > 0) {
-            currentSkills = [...latest.extracted_skills];
+            currentSkills = latest.extracted_skills.map(normalizeSkillName).filter(Boolean);
             renderSkillsChips(currentSkills);
           }
 
@@ -263,16 +302,18 @@ const ResumeReviewView = (() => {
       try {
         const records = await API.resume.listRecords();
         if (records && records.length > 0) {
-          const latest = records[0];
-          if (textarea) {
-            textarea.value = latest.extracted_text;
-            const counter = document.getElementById("char-counter");
-            if (counter) counter.textContent = `${textarea.value.length.toLocaleString()} characters`;
-            App.showToast(`Loaded "${latest.filename}" (${latest.file_type.toUpperCase()}).`, "success");
-          }
-          if (latest.extracted_skills) {
-            currentSkills = [...latest.extracted_skills];
-            renderSkillsChips(currentSkills);
+          const latest = await API.resume.getRecord(records[0].id);
+          if (latest) {
+            if (textarea && latest.extracted_text) {
+              textarea.value = latest.extracted_text;
+              const counter = document.getElementById("char-counter");
+              if (counter) counter.textContent = `${textarea.value.length.toLocaleString()} characters`;
+              App.showToast(`Loaded "${latest.filename}" (${latest.file_type.toUpperCase()}).`, "success");
+            }
+            if (latest.extracted_skills && latest.extracted_skills.length > 0) {
+              currentSkills = latest.extracted_skills.map(normalizeSkillName).filter(Boolean);
+              renderSkillsChips(currentSkills);
+            }
           }
         } else {
           App.showToast("No uploaded resumes found on your account. Upload a PDF/DOCX file above.", "error");

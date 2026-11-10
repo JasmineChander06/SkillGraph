@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
 
     # Resume Upload Configuration (Phase 2)
-    MAX_UPLOAD_SIZE_BYTES: int = 5 * 1024 * 1024  # 5 MB
+    MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB limit (accommodates high-res PDF/DOCX resumes)
     MIN_TEXT_LENGTH_THRESHOLD: int = 30  # Minimum non-whitespace characters
 
     model_config = SettingsConfigDict(

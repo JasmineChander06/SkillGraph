@@ -214,7 +214,8 @@ const Dashboard = (() => {
       if (resumes && resumes.length > 0) {
         const latestResume = await API.resume.getRecord(resumes[0].id);
         activeResumeText = latestResume.extracted_text || "";
-        const skills = latestResume.extracted_skills || [];
+        const rawSkills = latestResume.extracted_skills || [];
+        const skills = rawSkills.map(s => typeof s === "object" ? (s.canonical_name || s.name || s.skill_id || "") : String(s)).filter(Boolean);
 
         // Pre-fill text area for gap analysis
         const syncTextarea = document.getElementById("skills-resume-text");
@@ -329,7 +330,7 @@ const Dashboard = (() => {
           const missingContainer = document.getElementById("missing-skills-container");
           if (missingCount) missingCount.textContent = `${analysisA.missing_skills.length}`;
           if (missingContainer) {
-            matchedContainer.innerHTML = (analysisA.missing_skills || []).map(s => `
+            missingContainer.innerHTML = (analysisA.missing_skills || []).map(s => `
               <span class="skill-tag missing" title="~${s.estimated_hours || 15}h effort">
                 ${App.escapeHtml(s.canonical_name || s.name || s)} (~${s.estimated_hours || 15}h)
               </span>
@@ -602,7 +603,7 @@ const Dashboard = (() => {
     const axes = Object.entries(categories).map(([label, sampleSkills]) => {
       let matchedCount = 0;
       sampleSkills.forEach(s => {
-        if (matchedNames.has(s) || extractedSkills.some(es => (es.canonical_name || "").toLowerCase().includes(s))) {
+        if (matchedNames.has(s) || extractedSkills.some(es => (typeof es === "string" ? es : (es.canonical_name || es.name || "")).toLowerCase().includes(s))) {
           matchedCount++;
         }
       });

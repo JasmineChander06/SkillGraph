@@ -88,38 +88,88 @@ const App = (() => {
   /**
    * Update header action buttons based on login state
    */
-  const setupAuthUI = () => {
+  const setupAuthUI = async () => {
     const headerActions = document.getElementById("header-actions");
-    if (!headerActions) return;
-
+    const mobileDrawer = document.getElementById("mobile-nav-drawer");
     const isAuth = API.auth.isAuthenticated();
-    const user = API.auth.getUser();
+    let user = API.auth.getUser();
 
-    if (isAuth && user) {
-      const displayName = user.full_name || user.name || user.email.split("@")[0];
-      headerActions.innerHTML = `
-        <a href="dashboard.html" class="eyebrow-pill" style="text-transform:none; font-family:var(--font-sans); text-decoration:none;" title="View Profile on Dashboard">
-          ${escapeHtml(displayName)}
-        </a>
-        <button id="auth-signout-btn" class="btn btn-outline btn-sm" type="button">
-          Sign Out
-        </button>
-      `;
+    if (isAuth) {
+      if (!user) {
+        try {
+          user = await API.auth.getMe();
+          if (user) {
+            localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+          }
+        } catch {
+          // Token could be invalid or network temporarily offline
+        }
+      }
 
-      document.getElementById("auth-signout-btn")?.addEventListener("click", () => {
-        API.auth.logout();
-        showToast("Signed out successfully.", "info");
-        window.location.href = "index.html";
-      });
+      const displayName = user ? (user.full_name || user.name || (user.email ? user.email.split("@")[0] : "My Account")) : "My Account";
+
+      if (headerActions) {
+        headerActions.innerHTML = `
+          <a href="dashboard.html" class="eyebrow-pill" style="text-transform:none; font-family:var(--font-sans); text-decoration:none; padding: 0.35rem 0.85rem;" title="View Profile on Dashboard">
+            ${escapeHtml(displayName)}
+          </a>
+          <button id="auth-signout-btn" class="btn btn-outline btn-sm" type="button" aria-label="Sign out of SkillGraph">
+            Sign Out
+          </button>
+        `;
+
+        document.getElementById("auth-signout-btn")?.addEventListener("click", () => {
+          API.auth.logout();
+          showToast("Signed out successfully.", "info");
+          window.location.href = "index.html";
+        });
+      }
+
+      if (mobileDrawer) {
+        const existingMobileAuth = document.getElementById("mobile-auth-actions");
+        if (existingMobileAuth) existingMobileAuth.remove();
+
+        const mobileAuthDiv = document.createElement("div");
+        mobileAuthDiv.id = "mobile-auth-actions";
+        mobileAuthDiv.style.cssText = "margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem;";
+        mobileAuthDiv.innerHTML = `
+          <div style="font-size: 0.875rem; color: var(--muted-foreground); margin-bottom: 0.25rem;">Signed in as <strong>${escapeHtml(displayName)}</strong></div>
+          <button id="mobile-signout-btn" class="btn btn-outline btn-sm" type="button" style="width: 100%;">Sign Out</button>
+        `;
+        mobileDrawer.appendChild(mobileAuthDiv);
+
+        document.getElementById("mobile-signout-btn")?.addEventListener("click", () => {
+          API.auth.logout();
+          showToast("Signed out successfully.", "info");
+          window.location.href = "index.html";
+        });
+      }
+
     } else {
-      headerActions.innerHTML = `
-        <a href="auth.html?mode=signin" class="btn btn-outline btn-sm">
-          Sign In
-        </a>
-        <a href="auth.html?mode=signup" class="btn btn-primary btn-sm">
-          Create Account
-        </a>
-      `;
+      if (headerActions) {
+        headerActions.innerHTML = `
+          <a href="auth.html?mode=signin" class="btn btn-outline btn-sm">
+            Sign In
+          </a>
+          <a href="auth.html?mode=signup" class="btn btn-primary btn-sm">
+            Create Account
+          </a>
+        `;
+      }
+
+      if (mobileDrawer) {
+        const existingMobileAuth = document.getElementById("mobile-auth-actions");
+        if (existingMobileAuth) existingMobileAuth.remove();
+
+        const mobileAuthDiv = document.createElement("div");
+        mobileAuthDiv.id = "mobile-auth-actions";
+        mobileAuthDiv.style.cssText = "margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.5rem;";
+        mobileAuthDiv.innerHTML = `
+          <a href="auth.html?mode=signin" class="btn btn-outline btn-sm" style="text-align: center;">Sign In</a>
+          <a href="auth.html?mode=signup" class="btn btn-primary btn-sm" style="text-align: center;">Create Account</a>
+        `;
+        mobileDrawer.appendChild(mobileAuthDiv);
+      }
     }
   };
 
@@ -134,7 +184,7 @@ const App = (() => {
       modalEl.className = "modal-backdrop";
       modalEl.setAttribute("role", "dialog");
       modalEl.setAttribute("aria-modal", "true");
-      modalEl.innerHTML =
+      modalEl.innerHTML = `
         <div class="modal-card">
           <div class="modal-header">
             <div class="segmented-pill">
@@ -171,7 +221,7 @@ const App = (() => {
             JWT authenticated &bull; Salted PBKDF2 password hashing &bull; Zero plaintext retention
           </p>
         </div>
-        ;
+      `;
       document.body.appendChild(modalEl);
       authModal = modalEl;
     }
@@ -400,5 +450,9 @@ const App = (() => {
   };
 })();
 
-// Auto-initialize on DOM ready
-document.addEventListener("DOMContentLoaded", App.init);
+// Auto-initialize on DOM ready or immediately if already loaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", App.init);
+} else {
+  App.init();
+}

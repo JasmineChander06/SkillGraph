@@ -1,10 +1,10 @@
 # SkillGraph Comprehensive Verification & Testing Guide
 
-> **Document Version:** 2.1.0  
+> **Document Version:** 2.2.0  
 > **Test Framework:** Pytest 9.2.0 (Pluggy 1.7.0, AnyIO 4.16.0)  
 > **Environment:** Python 3.13.7 (Windows / Virtual Environment)  
-> **Latest Suite Run:** 172 passed, 0 failed, 8 warnings in 9.19s  
-> **Verified State:** Full End-to-End Workflow, Role Discovery, Comparisons, Evidence-Aware Market Data, Resume Advisor, GitHub/LeetCode Coding Profiles, Job Market Analytics, Frontend Integration & UI Integrity  
+> **Latest Suite Run:** 186 passed, 0 failed, 8 warnings in 9.20s  
+> **Verified State:** Full End-to-End Workflow, Security Audit (IDOR & Cryptographic Gates), Role Discovery, Dual Comparisons, Evidence-Aware Market Data, Resume Advisor, GitHub/LeetCode Coding Profiles, Job Market Analytics, Frontend Integration & UI Integrity  
 
 ---
 
@@ -57,6 +57,7 @@ engine = create_engine(
 | `tests/test_resume_advisor.py` | 9 | Resume rating, metric quantification, action verbs, fluff word elimination, Google XYZ bullet optimizer. | **9 / 9 PASSED** |
 | `tests/test_coding_profiles.py` | 5 | GitHub repository activity, LeetCode problem breakdown, DSA interview readiness score. | **5 / 5 PASSED** |
 | `tests/test_job_market_analytics.py` | 3 | Cross-role market trends, skill co-occurrence pairs, category distributions. | **3 / 3 PASSED** |
+| `tests/test_audit_security_and_e2e.py` | 14 | Cross-user IDOR isolation (resumes, roadmaps, tasks), unauthenticated gate, expired/tampered tokens, and 10-stage end-to-end lifecycle. | **14 / 14 PASSED** |
 | `tests/test_frontend_integration.py` | 2 | Static file route verification across all 21 assets, and full 15-step frontend-backend integration lifecycle. | **2 / 2 PASSED** |
 | `tests/test_health.py` | 5 | Health check payload, root greeting, CORS allowed origins, disallowed origin rejection. | **5 / 5 PASSED** |
 | **Total** | **172** | **Complete Full-Stack Application Pipeline** | **172 / 172 PASSED** |

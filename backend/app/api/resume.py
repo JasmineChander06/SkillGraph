@@ -169,13 +169,20 @@ async def get_resume_record(
             detail="Access forbidden: you do not own this resume record.",
         )
 
+    raw_skills = record.get_extracted_skills()
+    clean_skills = [
+        (s.get("canonical_name") or s.get("name") or s.get("skill_id") or "")
+        if isinstance(s, dict) else str(s)
+        for s in raw_skills
+    ]
     return {
         "id": record.id,
         "filename": record.filename,
         "file_type": record.file_type,
         "file_size_bytes": record.file_size_bytes,
         "extracted_text": record.extracted_text,
-        "extracted_skills": record.get_extracted_skills(),
+        "extracted_skills": clean_skills,
+        "extracted_skills_detail": raw_skills,
         "created_at": record.created_at.isoformat() if record.created_at else None,
     }
 

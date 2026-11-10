@@ -933,4 +933,75 @@ SkillGraph uses standard HTTP Bearer token authentication with JSON Web Tokens (
   }
   ```
 
+---
+
+## 11. Interactive Review, Selection Persistence & Progress Summary Endpoints
+
+### `PUT /api/resume/skills`
+* **Method:** `PUT`
+* **Path:** `/api/resume/skills`
+* **Authentication:** Required (`Authorization: Bearer <token>`)
+* **Description:** Persists user-reviewed skills (additions and deletions) back to the user's latest active resume record.
+* **Request Body:**
+  ```json
+  {
+    "skills": ["Python", "Docker", "FastAPI", "SQLAlchemy", "PostgreSQL"]
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Skills updated successfully",
+    "skills_count": 5,
+    "skills": ["Python", "Docker", "FastAPI", "SQLAlchemy", "PostgreSQL"]
+  }
+  ```
+
+---
+
+### `POST /api/roles/save-selection`
+* **Method:** `POST`
+* **Path:** `/api/roles/save-selection`
+* **Authentication:** Required (`Authorization: Bearer <token>`)
+* **Description:** Saves the user's chosen primary target role and secondary comparison role to their persistent profile.
+* **Request Body:**
+  ```json
+  {
+    "target_role_id": "backend-engineer",
+    "secondary_role_id": "ml-engineer"
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Role selection saved successfully",
+    "target_role_id": "backend-engineer",
+    "secondary_role_id": "ml-engineer"
+  }
+  ```
+
+---
+
+### `GET /api/roadmaps/summary`
+* **Method:** `GET`
+* **Path:** `/api/roadmaps/summary`
+* **Authentication:** Required (`Authorization: Bearer <token>`)
+* **Description:** Returns aggregate completion progress and task metrics for the authenticated user's active roadmap.
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "has_roadmap": true,
+    "roadmap_id": 1,
+    "role_title": "Backend Engineer",
+    "total_tasks": 18,
+    "completed_tasks": 6,
+    "progress_percentage": 33.3,
+    "total_hours": 60,
+    "completed_hours": 20
+  }
+  ```
+
+
 
