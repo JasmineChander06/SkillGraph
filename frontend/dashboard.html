@@ -76,35 +76,100 @@
 
         <div class="flex items-center gap-3">
           <a href="#resume-section" class="btn btn-primary btn-sm">
-            Update resume &rarr;
+            Upload resume &rarr;
           </a>
         </div>
       </div>
     </header>
 
+    <!-- First-Time User Onboarding Banner -->
+    <section id="onboarding-section" class="card hidden" style="border: 1.5px solid var(--accent); background: var(--card); margin-bottom: 2.5rem; padding: 2rem; box-shadow: var(--shadow-md);">
+      <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
+        <div>
+          <span class="eyebrow-pill" style="background: var(--accent); color: var(--background);">Step 1 of 2 &bull; Onboarding</span>
+          <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-top: 0.35rem;">Tell us about your career goals</h2>
+          <p style="font-size: 0.85rem; color: var(--muted-foreground); margin-top: 0.25rem;">
+            Provide your background so SkillGraph can accurately calibrate your readiness benchmarks. You can update this later.
+          </p>
+        </div>
+        <button id="onboarding-dismiss-btn" class="btn btn-outline btn-sm" type="button" style="font-size:0.75rem;">
+          Update later &times;
+        </button>
+      </div>
+
+      <form id="onboarding-form" style="margin-top: 1.25rem;">
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="onboarding-name">Full Name</label>
+            <input id="onboarding-name" class="form-input" type="text" placeholder="Your Name" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="onboarding-stage">Current Stage</label>
+            <select id="onboarding-stage" class="form-input">
+              <option value="Undergraduate Student">Undergraduate Student (B.Tech / BS)</option>
+              <option value="Graduate / Master's Student">Graduate / Master's Student (MS / M.Tech)</option>
+              <option value="Early Career Engineer (0-2 yrs)">Early Career Engineer (0–2 years)</option>
+              <option value="Mid-Level Engineer (3-5 yrs)">Mid-Level Engineer (3–5 years)</option>
+              <option value="Career Switcher">Career Switcher</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="onboarding-interests">Career Interests</label>
+            <input id="onboarding-interests" class="form-input" type="text" placeholder="e.g. Backend APIs, Distributed Systems, ML">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="onboarding-skill-level">Current Skill Level</label>
+            <select id="onboarding-skill-level" class="form-input">
+              <option value="Beginner">Beginner / Foundational</option>
+              <option value="Intermediate" selected>Intermediate / Project Experience</option>
+              <option value="Advanced">Advanced / Production Experience</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="grid-column: span 1 / -1;">
+            <label class="form-label" for="onboarding-target-role">Initial Target Role</label>
+            <select id="onboarding-target-role" class="form-input">
+              <!-- Dynamically populated from /api/roles/ -->
+              <option value="backend-engineer">Backend Engineer</option>
+              <option value="harness-engineer">Harness Engineer</option>
+              <option value="forward-deployed-engineer">Forward Deployed Engineer</option>
+              <option value="machine-learning-engineer">Machine Learning Engineer</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="onboarding-save-btn" class="btn btn-primary btn-md" type="submit">
+          Save profile &amp; proceed to resume upload &rarr;
+        </button>
+      </form>
+    </section>
+
     <!-- 1. KPI Stats Grid (4 Columns) -->
     <section aria-label="Key Performance Indicators" class="kpi-grid">
       <div class="card kpi-card">
         <span class="kpi-title">Readiness</span>
-        <div id="kpi-readiness" class="kpi-value">78%</div>
-        <span class="kpi-delta positive">+7 this month</span>
+        <div id="kpi-readiness" class="kpi-value">—</div>
+        <span id="kpi-readiness-sub" class="kpi-delta">Upload resume below</span>
       </div>
 
       <div class="card kpi-card">
         <span class="kpi-title">Skills tracked</span>
-        <div id="kpi-skills" class="kpi-value">12</div>
-        <span class="kpi-delta">Extracted from resume</span>
+        <div id="kpi-skills" class="kpi-value">0</div>
+        <span id="kpi-skills-sub" class="kpi-delta">Extracted from resume</span>
       </div>
 
       <div class="card kpi-card">
         <span class="kpi-title">Roles compared</span>
-        <div class="kpi-value">11</div>
+        <div class="kpi-value">10</div>
         <span class="kpi-delta">Curated ontologies</span>
       </div>
 
       <div class="card kpi-card">
         <span class="kpi-title">Active roadmaps</span>
-        <div id="kpi-roadmaps" class="kpi-value">1</div>
+        <div id="kpi-roadmaps" class="kpi-value">0</div>
         <span class="kpi-delta">6-week curriculum</span>
       </div>
     </section>

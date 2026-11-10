@@ -33,13 +33,24 @@ const App = (() => {
         (href === "index.html" && (currentPath.endsWith("index.html") || currentPath.endsWith("/"))) ||
         (href === "dashboard.html" && currentPath.endsWith("dashboard.html")) ||
         (href === "roles.html" && currentPath.endsWith("roles.html")) ||
-        (href === "roadmap.html" && currentPath.endsWith("roadmap.html"))
+        (href === "roadmap.html" && currentPath.endsWith("roadmap.html")) ||
+        (href === "resume-review.html" && currentPath.endsWith("resume-review.html")) ||
+        (href === "coding.html" && currentPath.endsWith("coding.html")) ||
+        (href === "analytics.html" && currentPath.endsWith("analytics.html"))
       );
 
       if (isCurrent) {
         link.classList.add("active");
       } else {
         link.classList.remove("active");
+      }
+
+      // Phase 3: Redirect unauthenticated visitors to auth.html with target parameter
+      if (href !== "index.html" && !API.auth.isAuthenticated()) {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          window.location.href = `auth.html?redirect=${encodeURIComponent(href)}`;
+        });
       }
     });
   };
@@ -63,14 +74,12 @@ const App = (() => {
    * Listen for custom auth events across modules
    */
   const setupAuthListeners = () => {
-    // When session expires
     window.addEventListener("sg:auth-expired", (e) => {
       setupAuthUI();
       showToast(e.detail?.message || "Session expired. Please sign in again.", "error");
-      openAuthModal("signin");
+      window.location.href = `auth.html?redirect=${encodeURIComponent(window.location.pathname.split("/").pop() || "dashboard.html")}`;
     });
 
-    // When user logs in or out
     window.addEventListener("sg:auth-changed", () => {
       setupAuthUI();
       if (typeof window.refreshDashboard === "function") window.refreshDashboard();
@@ -102,20 +111,17 @@ const App = (() => {
       document.getElementById("auth-signout-btn")?.addEventListener("click", () => {
         API.auth.logout();
         showToast("Signed out successfully.", "info");
-        window.location.reload();
+        window.location.href = "index.html";
       });
     } else {
       headerActions.innerHTML = `
-        <button id="auth-signin-btn" class="btn btn-outline btn-sm" type="button">
+        <a href="auth.html?mode=signin" class="btn btn-outline btn-sm">
           Sign in
-        </button>
-        <button id="auth-signup-btn" class="btn btn-primary btn-sm" type="button">
+        </a>
+        <a href="auth.html?mode=signup" class="btn btn-primary btn-sm">
           Get started
-        </button>
+        </a>
       `;
-
-      document.getElementById("auth-signin-btn")?.addEventListener("click", () => openAuthModal("signin"));
-      document.getElementById("auth-signup-btn")?.addEventListener("click", () => openAuthModal("signup"));
     }
   };
 

@@ -62,6 +62,32 @@ def init_db(bind_engine=None) -> None:
 
     target = bind_engine or engine
     Base.metadata.create_all(bind=target)
+
+    # Seamlessly add onboarding columns to existing sqlite users table if missing
+    try:
+        from sqlalchemy import text
+        with target.connect() as conn:
+            result = conn.execute(text("PRAGMA table_info(users)"))
+            cols = {row[1] for row in result.fetchall()}
+            if cols:
+                if "education_stage" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN education_stage VARCHAR(100)"))
+                if "career_interests" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN career_interests VARCHAR(255)"))
+                if "skill_level" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN skill_level VARCHAR(50)"))
+                if "target_role" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN target_role VARCHAR(100)"))
+                if "github_username" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN github_username VARCHAR(100)"))
+                if "leetcode_username" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN leetcode_username VARCHAR(100)"))
+                if "onboarding_completed" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN onboarding_completed BOOLEAN DEFAULT 0"))
+                conn.commit()
+    except Exception as exc:
+        logger.debug("Migration check note: %s", exc)
+
     logger.info("Database tables initialized successfully.")
 
 

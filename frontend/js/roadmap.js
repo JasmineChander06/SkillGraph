@@ -7,6 +7,9 @@ const RoadmapView = (() => {
   let activeRoadmap = null;
 
   const init = async () => {
+    // Phase 3 Auth Guard
+    if (!API.auth.requireAuth()) return;
+
     await populateRoleDropdown();
     setupGenerateForm();
     await loadInitialRoadmap();

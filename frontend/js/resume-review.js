@@ -4,9 +4,32 @@
  */
 
 const ResumeReviewView = (() => {
-  const init = () => {
+  const init = async () => {
+    // Phase 3 Auth Guard
+    if (!API.auth.requireAuth()) return;
+
     setupCharCounter();
     setupButtons();
+    await autoLoadSavedResume();
+  };
+
+  const autoLoadSavedResume = async () => {
+    const textarea = document.getElementById("review-resume-text");
+    if (!textarea || textarea.value.trim()) return;
+
+    try {
+      const records = await API.resume.listRecords();
+      if (records && records.length > 0) {
+        const latest = await API.resume.getRecord(records[0].id);
+        if (latest && latest.extracted_text) {
+          textarea.value = latest.extracted_text;
+          const counter = document.getElementById("char-counter");
+          if (counter) counter.textContent = `${textarea.value.length.toLocaleString()} characters`;
+        }
+      }
+    } catch {
+      // Ignore if no saved resume
+    }
   };
 
   const setupCharCounter = () => {

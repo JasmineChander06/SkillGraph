@@ -11,6 +11,9 @@ const RolesView = (() => {
   let activeSearchQuery = "";
 
   const init = async () => {
+    // Phase 3 Auth Guard
+    if (!API.auth.requireAuth()) return;
+
     setupFilters();
     setupComparisonForm();
     setupModalListeners();

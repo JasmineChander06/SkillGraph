@@ -14,6 +14,7 @@ from app.models.user import User
 from app.schemas.auth import (
     TokenResponse,
     UserLoginRequest,
+    UserOnboardingRequest,
     UserRegisterRequest,
     UserResponse,
 )
@@ -39,6 +40,13 @@ def _build_token_response(user: User) -> TokenResponse:
         email=user.email,
         full_name=user.full_name,
         name=user.full_name,
+        education_stage=user.education_stage,
+        career_interests=user.career_interests,
+        skill_level=user.skill_level,
+        target_role=user.target_role,
+        github_username=user.github_username,
+        leetcode_username=user.leetcode_username,
+        onboarding_completed=user.onboarding_completed,
         is_active=user.is_active,
         created_at=user.created_at,
     )
@@ -137,6 +145,134 @@ async def get_me(
         email=current_user.email,
         full_name=current_user.full_name,
         name=current_user.full_name,
+        education_stage=current_user.education_stage,
+        career_interests=current_user.career_interests,
+        skill_level=current_user.skill_level,
+        target_role=current_user.target_role,
+        github_username=current_user.github_username,
+        leetcode_username=current_user.leetcode_username,
+        onboarding_completed=current_user.onboarding_completed,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+    )
+
+
+# First-Time User Onboarding Endpoints
+@router.post(
+    "/api/auth/onboarding",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Save First-Time Onboarding Profile",
+)
+@router.post(
+    "/api/user/onboarding",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False,
+)
+async def save_onboarding(
+    payload: UserOnboardingRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserResponse:
+    """Save user onboarding info (education stage, career interests, skill level, target role)."""
+    if payload.full_name is not None and payload.full_name.strip():
+        current_user.full_name = payload.full_name.strip()
+    if payload.education_stage is not None:
+        current_user.education_stage = payload.education_stage.strip()
+    if payload.career_interests is not None:
+        current_user.career_interests = payload.career_interests.strip()
+    if payload.skill_level is not None:
+        current_user.skill_level = payload.skill_level.strip()
+    if payload.target_role is not None:
+        current_user.target_role = payload.target_role.strip()
+
+    current_user.onboarding_completed = True
+    db.commit()
+    db.refresh(current_user)
+
+    logger.info("Saved onboarding for User ID %s", current_user.id)
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        name=current_user.full_name,
+        education_stage=current_user.education_stage,
+        career_interests=current_user.career_interests,
+        skill_level=current_user.skill_level,
+        target_role=current_user.target_role,
+        github_username=current_user.github_username,
+        leetcode_username=current_user.leetcode_username,
+        onboarding_completed=current_user.onboarding_completed,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+    )
+
+
+@router.get(
+    "/api/user/onboarding",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Get Onboarding Profile",
+)
+async def get_onboarding(
+    current_user: User = Depends(get_current_user),
+) -> UserResponse:
+    """Retrieve onboarding profile data for the authenticated user."""
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        name=current_user.full_name,
+        education_stage=current_user.education_stage,
+        career_interests=current_user.career_interests,
+        skill_level=current_user.skill_level,
+        target_role=current_user.target_role,
+        github_username=current_user.github_username,
+        leetcode_username=current_user.leetcode_username,
+        onboarding_completed=current_user.onboarding_completed,
+        is_active=current_user.is_active,
+        created_at=current_user.created_at,
+    )
+
+
+@router.put(
+    "/api/user/profile",
+    response_model=UserResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Update User Profile",
+)
+async def update_profile(
+    payload: UserOnboardingRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> UserResponse:
+    """Update profile information for the authenticated user."""
+    if payload.full_name is not None:
+        current_user.full_name = payload.full_name.strip() or None
+    if payload.education_stage is not None:
+        current_user.education_stage = payload.education_stage.strip() or None
+    if payload.career_interests is not None:
+        current_user.career_interests = payload.career_interests.strip() or None
+    if payload.skill_level is not None:
+        current_user.skill_level = payload.skill_level.strip() or None
+    if payload.target_role is not None:
+        current_user.target_role = payload.target_role.strip() or None
+
+    db.commit()
+    db.refresh(current_user)
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        name=current_user.full_name,
+        education_stage=current_user.education_stage,
+        career_interests=current_user.career_interests,
+        skill_level=current_user.skill_level,
+        target_role=current_user.target_role,
+        github_username=current_user.github_username,
+        leetcode_username=current_user.leetcode_username,
+        onboarding_completed=current_user.onboarding_completed,
         is_active=current_user.is_active,
         created_at=current_user.created_at,
     )

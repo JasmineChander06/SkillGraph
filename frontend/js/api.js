@@ -100,6 +100,14 @@ const API = (() => {
         window.dispatchEvent(new CustomEvent("sg:auth-changed"));
       },
       isAuthenticated: () => !!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN),
+      requireAuth: (redirectTarget) => {
+        if (!localStorage.getItem(CONFIG.STORAGE_KEYS.TOKEN)) {
+          const current = redirectTarget || window.location.pathname.split("/").pop() || "dashboard.html";
+          window.location.href = `auth.html?redirect=${encodeURIComponent(current)}`;
+          return false;
+        }
+        return true;
+      },
       getUser: () => {
         try {
           return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.USER) || "null");
@@ -107,6 +115,19 @@ const API = (() => {
           return null;
         }
       }
+    },
+
+    // 2.5 User Profile & Onboarding
+    user: {
+      getOnboarding: () => request("/api/user/onboarding", { method: "GET" }),
+      saveOnboarding: (data) => request("/api/user/onboarding", {
+        method: "POST",
+        body: JSON.stringify(data)
+      }),
+      updateProfile: (data) => request("/api/user/profile", {
+        method: "PUT",
+        body: JSON.stringify(data)
+      })
     },
 
     // 3. Roles & Taxonomy
@@ -173,7 +194,8 @@ const API = (() => {
       analyze: (handles) => request("/api/profiles/analyze", {
         method: "POST",
         body: JSON.stringify(handles)
-      })
+      }),
+      getSaved: () => request("/api/profiles/saved", { method: "GET" })
     },
 
     // 7. Roadmaps & Progress

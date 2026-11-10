@@ -59,10 +59,27 @@ class UserResponse(BaseModel):
     email: str = Field(..., description="Registered email address.")
     full_name: Optional[str] = Field(None, description="Full name.")
     name: Optional[str] = Field(None, description="Display name alias.")
+    education_stage: Optional[str] = Field(None, description="Education stage.")
+    career_interests: Optional[str] = Field(None, description="Career interests.")
+    skill_level: Optional[str] = Field(None, description="Skill level.")
+    target_role: Optional[str] = Field(None, description="Target role ID.")
+    github_username: Optional[str] = Field(None, description="GitHub username.")
+    leetcode_username: Optional[str] = Field(None, description="LeetCode username.")
+    onboarding_completed: bool = Field(False, description="Whether onboarding has been completed.")
     is_active: bool = Field(True, description="Account active status.")
     created_at: Optional[datetime] = Field(None, description="Timestamp of registration.")
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserOnboardingRequest(BaseModel):
+    """Payload to save first-time user onboarding information."""
+
+    full_name: Optional[str] = Field(None, description="Candidate or developer full name.")
+    education_stage: Optional[str] = Field(None, description="Current education or professional stage.")
+    career_interests: Optional[str] = Field(None, description="Career interests.")
+    skill_level: Optional[str] = Field(None, description="Current skill level, if provided.")
+    target_role: Optional[str] = Field(None, description="Initial target role ID.")
 
 
 class TokenResponse(BaseModel):

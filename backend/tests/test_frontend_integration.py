@@ -57,6 +57,7 @@ def test_static_frontend_files_served(integration_client):
     """Verify all HTML pages and assets are served with HTTP 200."""
     routes = [
         "/frontend/index.html",
+        "/frontend/auth.html",
         "/frontend/dashboard.html",
         "/frontend/roles.html",
         "/frontend/roadmap.html",
@@ -70,6 +71,7 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/css/roadmap.css",
         "/frontend/js/config.js",
         "/frontend/js/api.js",
+        "/frontend/js/auth.js",
         "/frontend/js/app.js",
         "/frontend/js/dashboard.js",
         "/frontend/js/roles.js",

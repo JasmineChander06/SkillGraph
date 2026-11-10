@@ -272,3 +272,95 @@ class TestPasswordSecurityRequirements:
         hash1 = hash_password(plain)
         hash2 = hash_password(plain)
         assert hash1 != hash2
+
+
+class TestUserOnboardingAndProfilePersistence:
+    """Phase 4 & 5: Verify first-time user onboarding and profile persistence."""
+
+    def test_first_time_user_has_pending_onboarding(self, auth_client):
+        """New accounts should start with onboarding_completed=False."""
+        reg = auth_client.post("/api/auth/register", json={
+            "email": "newbie@example.com",
+            "password": "Password123!",
+            "full_name": "New Candidate",
+        })
+        assert reg.status_code == 201
+        data = reg.json()
+        assert data["user"]["onboarding_completed"] is False
+        assert data["user"]["target_role"] is None
+
+    def test_complete_onboarding_persists_to_database(self, auth_client):
+        """Onboarding data should be saved and marked complete in SQLite."""
+        reg = auth_client.post("/api/auth/register", json={
+            "email": "onboard@example.com",
+            "password": "Password123!",
+            "full_name": "Alex Chen",
+        })
+        token = reg.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Submit onboarding
+        onboard_res = auth_client.post("/api/user/onboarding", json={
+            "education_stage": "Undergraduate Student",
+            "career_interests": "Distributed Systems, Backend APIs",
+            "skill_level": "Intermediate",
+            "target_role": "harness-engineer",
+        }, headers=headers)
+        assert onboard_res.status_code == 200
+        user_data = onboard_res.json()
+
+        assert user_data["onboarding_completed"] is True
+        assert user_data["education_stage"] == "Undergraduate Student"
+        assert user_data["career_interests"] == "Distributed Systems, Backend APIs"
+        assert user_data["skill_level"] == "Intermediate"
+        assert user_data["target_role"] == "harness-engineer"
+
+        # Verify get_me and get_onboarding return persisted data
+        me_res = auth_client.get("/api/auth/me", headers=headers)
+        assert me_res.status_code == 200
+        assert me_res.json()["onboarding_completed"] is True
+        assert me_res.json()["target_role"] == "harness-engineer"
+
+        onboard_get = auth_client.get("/api/user/onboarding", headers=headers)
+        assert onboard_get.status_code == 200
+        assert onboard_get.json()["career_interests"] == "Distributed Systems, Backend APIs"
+
+    def test_update_profile_modifies_saved_data(self, auth_client):
+        """Users can update their target role and information later."""
+        reg = auth_client.post("/api/auth/register", json={
+            "email": "switcher@example.com",
+            "password": "Password123!",
+            "full_name": "Career Switcher",
+        })
+        token = reg.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        # Initial onboarding
+        auth_client.post("/api/user/onboarding", json={
+            "education_stage": "Career Switcher",
+            "target_role": "backend-engineer",
+        }, headers=headers)
+
+        # Later update profile to forward-deployed-engineer
+        update_res = auth_client.put("/api/user/profile", json={
+            "target_role": "forward-deployed-engineer",
+            "skill_level": "Advanced",
+        }, headers=headers)
+        assert update_res.status_code == 200
+        assert update_res.json()["target_role"] == "forward-deployed-engineer"
+        assert update_res.json()["skill_level"] == "Advanced"
+
+    def test_unauthenticated_onboarding_rejected(self, auth_client):
+        """Onboarding endpoints reject unauthenticated requests with 401."""
+        res = auth_client.post("/api/user/onboarding", json={
+            "target_role": "backend-engineer"
+        })
+        assert res.status_code == 401
+
+        res_get = auth_client.get("/api/user/onboarding")
+        assert res_get.status_code == 401
+
+        res_put = auth_client.put("/api/user/profile", json={
+            "target_role": "backend-engineer"
+        })
+        assert res_put.status_code == 401

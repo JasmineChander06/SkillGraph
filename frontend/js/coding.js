@@ -3,8 +3,27 @@
  */
 
 const CodingProfilesView = (() => {
-  const init = () => {
+  const init = async () => {
+    // Phase 3 Auth Guard
+    if (!API.auth.requireAuth()) return;
+
     setupAnalyzeButton();
+    await loadSavedHandles();
+  };
+
+  const loadSavedHandles = async () => {
+    try {
+      const saved = await API.profiles.getSaved();
+      const ghInput = document.getElementById("input-github-user");
+      const lcInput = document.getElementById("input-leetcode-user");
+      if (saved.github_username && ghInput) ghInput.value = saved.github_username;
+      if (saved.leetcode_username && lcInput) lcInput.value = saved.leetcode_username;
+      if (saved.github_username || saved.leetcode_username) {
+        document.getElementById("btn-analyze-profiles")?.click();
+      }
+    } catch {
+      // Ignore if no saved handles yet
+    }
   };
 
   const setupAnalyzeButton = () => {

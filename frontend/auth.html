@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account — SkillGraph</title>
+  <meta name="description" content="Sign in or create your SkillGraph account to access personalized career readiness graphs, skill gap analyses, and 6-week roadmaps.">
+  
+  <!-- Google Fonts: Fraunces (Display), Inter (Body), JetBrains Mono (Code/Pills) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Core Design Tokens & Component Stylesheets -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body class="bg-paper text-ink min-h-screen flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner container">
+      <a href="index.html" class="brand" aria-label="SkillGraph Home">
+        <span class="brand-text">SkillGraph</span>
+      </a>
+
+      <div class="header-actions">
+        <a href="index.html" class="btn btn-outline btn-sm">
+          &larr; Back to Overview
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Auth Container -->
+  <main class="container" style="max-width: 480px; margin: 3rem auto 4rem; padding: 0 1rem;">
+    <div class="card" style="padding: 2.25rem 2rem; border: 1px solid var(--border); box-shadow: var(--shadow-md);">
+      
+      <!-- Card Header -->
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <span class="eyebrow-pill" style="margin-bottom: 0.75rem;">Account Access</span>
+        <h1 id="auth-heading" style="font-family: var(--font-display); font-size: 1.85rem; line-height: 1.2; margin-bottom: 0.5rem;">
+          Sign in to SkillGraph
+        </h1>
+        <p id="auth-subheading" style="font-size: 0.85rem; color: var(--muted-foreground);">
+          Access your personal career readiness graph, saved analyses, and learning roadmaps.
+        </p>
+      </div>
+
+      <!-- Segmented Tab Controls -->
+      <div class="segmented-pill" style="margin-bottom: 1.5rem; width: 100%;">
+        <button id="tab-signin" class="segmented-pill-btn active" type="button" style="flex: 1;">
+          Sign in
+        </button>
+        <button id="tab-signup" class="segmented-pill-btn" type="button" style="flex: 1;">
+          Create account
+        </button>
+      </div>
+
+      <!-- Alert / Validation Box -->
+      <div id="auth-alert" class="alert-box error hidden" style="margin-bottom: 1.25rem;"></div>
+
+      <!-- Auth Form -->
+      <form id="auth-form" novalidate>
+        <!-- Full Name (Sign Up only) -->
+        <div id="field-name-container" class="form-group hidden">
+          <label class="form-label" for="auth-name">Full Name <span style="color:var(--accent);">*</span></label>
+          <input 
+            id="auth-name" 
+            class="form-input" 
+            type="text" 
+            placeholder="e.g. Alex Chen" 
+            autocomplete="name"
+          >
+        </div>
+
+        <!-- Email Address -->
+        <div class="form-group">
+          <label class="form-label" for="auth-email">Email Address <span style="color:var(--accent);">*</span></label>
+          <input 
+            id="auth-email" 
+            class="form-input" 
+            type="email" 
+            placeholder="you@domain.com" 
+            required 
+            autocomplete="email"
+          >
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <div class="flex items-center justify-between" style="margin-bottom: 0.25rem;">
+            <label class="form-label" for="auth-password" style="margin-bottom:0;">Password <span style="color:var(--accent);">*</span></label>
+            <span id="password-hint" style="font-size: 0.75rem; color: var(--muted-foreground); display: none;">min 8 chars</span>
+          </div>
+          <input 
+            id="auth-password" 
+            class="form-input" 
+            type="password" 
+            placeholder="••••••••" 
+            required 
+            autocomplete="current-password"
+          >
+        </div>
+
+        <!-- Submit Button -->
+        <button id="auth-submit-btn" class="btn btn-primary btn-lg" type="submit" style="width: 100%; margin-top: 0.75rem;">
+          Sign in &rarr;
+        </button>
+      </form>
+
+      <!-- Security Microcopy -->
+      <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border); text-align: center;">
+        <p style="font-size: 0.75rem; color: var(--muted-foreground); line-height: 1.5;">
+          🔒 <strong>Secure by Design:</strong> Salted PBKDF2 password hashing &bull; Signed JWT token authentication &bull; Zero plaintext password storage.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" style="margin-top: auto;">
+    <div class="container flex flex-wrap items-center justify-between gap-4">
+      <p>&copy; <span id="current-year">2026</span> SkillGraph &bull; Paper &amp; Ink edition</p>
+      <div class="flex gap-4">
+        <a href="index.html" class="ink-underline">Overview</a>
+        <a href="docs/api-reference.md" class="ink-underline">API Docs</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
