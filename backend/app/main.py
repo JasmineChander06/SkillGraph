@@ -3,7 +3,8 @@
 from contextlib import asynccontextmanager
 import logging
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -80,11 +81,15 @@ async def health_check():
 
 
 @app.get("/", tags=["Root"])
-async def root():
-    """Root endpoint providing a friendly status greeting and documentation link."""
+async def root(request: Request):
+    """Root endpoint: redirects browser requests to frontend landing page, returns JSON for API clients."""
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept and "application/json" not in accept:
+        return RedirectResponse(url="/frontend/index.html")
     return {
         "message": f"Welcome to {settings.APP_NAME}",
         "version": settings.APP_VERSION,
         "docs_url": "/docs",
         "health_check": "/api/health",
+        "frontend": "/frontend/index.html",
     }
