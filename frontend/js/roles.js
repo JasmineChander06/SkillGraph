@@ -429,9 +429,14 @@ const RolesView = (() => {
 
         <!-- Action Footer -->
         <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-          <a href="roadmap.html?role=${encodeURIComponent(roleId)}" class="btn btn-primary">
-            Generate 6-week roadmap for ${App.escapeHtml(details.canonical_title)} &rarr;
-          </a>
+          <div class="flex items-center gap-3">
+            <a href="roadmap.html?role=${encodeURIComponent(roleId)}" class="btn btn-primary">
+              Generate 6-week roadmap &rarr;
+            </a>
+            <button id="modal-set-target-btn" class="btn btn-outline" data-role-id="${roleId}" type="button">
+              Set as Target Role
+            </button>
+          </div>
           <button id="modal-compare-this-btn" class="btn btn-outline" data-role-id="${roleId}" type="button">
             Compare this role with another &darr;
           </button>
@@ -453,6 +458,20 @@ const RolesView = (() => {
             document.getElementById("compare-section")?.scrollIntoView({ behavior: "smooth" });
           }
         });
+      });
+
+      document.getElementById("modal-set-target-btn")?.addEventListener("click", async () => {
+        try {
+          await API.user.updateProfile({ target_role: roleId });
+          const user = API.auth.getUser() || {};
+          user.target_role = roleId;
+          localStorage.setItem(CONFIG.STORAGE_KEYS.USER, JSON.stringify(user));
+          localStorage.setItem(CONFIG.STORAGE_KEYS.ACTIVE_ROLE, roleId);
+          App.showToast(`Set "${details.canonical_title}" as your target role.`, "success");
+          closeRoleModal();
+        } catch (err) {
+          App.showToast(err.message || "Failed to set target role.", "error");
+        }
       });
 
       document.getElementById("modal-compare-this-btn")?.addEventListener("click", () => {

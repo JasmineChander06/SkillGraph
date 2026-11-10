@@ -63,7 +63,6 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/roadmap.html",
         "/frontend/resume-review.html",
         "/frontend/coding.html",
-        "/frontend/analytics.html",
         "/frontend/css/variables.css",
         "/frontend/css/style.css",
         "/frontend/css/components.css",
@@ -78,7 +77,6 @@ def test_static_frontend_files_served(integration_client):
         "/frontend/js/roadmap.js",
         "/frontend/js/resume-review.js",
         "/frontend/js/coding.js",
-        "/frontend/js/analytics.js",
     ]
     for r in routes:
         res = integration_client.get(r)

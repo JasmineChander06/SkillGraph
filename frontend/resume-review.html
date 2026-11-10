@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resume Review & Rating — SkillGraph</title>
-  <meta name="description" content="AI & heuristic critique of your resume: overall score, things to add, fluff words to eliminate, and Google XYZ bullet rewrites." />
+  <title>Resume — SkillGraph</title>
+  <meta name="description" content="Upload your resume to extract technical skills, verify competencies, and receive an objective scorecard." />
 
   <!-- Google Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -24,21 +24,16 @@
     <div class="header-container">
       <a href="index.html" class="brand-link" aria-label="SkillGraph Homepage">
         <span class="brand-badge" aria-hidden="true">S</span>
-        <span>SkillGraph<span class="brand-suffix">.ai</span></span>
+        <span>SkillGraph</span>
       </a>
 
       <nav class="nav-links-desktop" aria-label="Primary Navigation">
         <a href="index.html" class="nav-pill">Overview</a>
         <a href="dashboard.html" class="nav-pill">Dashboard</a>
+        <a href="resume-review.html" class="nav-pill active">Resume</a>
         <a href="roles.html" class="nav-pill">Roles</a>
+        <a href="coding.html" class="nav-pill">Coding Profile</a>
         <a href="roadmap.html" class="nav-pill">Roadmap</a>
-        <a href="resume-review.html" class="nav-pill active">Resume Review</a>
-        <a href="coding.html" class="nav-pill">Coding Signal</a>
-        <a href="analytics.html" class="nav-pill">Market Analytics</a>
-        <span class="source-badge">
-          <span class="status-dot awaiting" aria-hidden="true"></span>
-          <span>Connecting…</span>
-        </span>
       </nav>
 
       <div class="header-actions">
@@ -53,11 +48,10 @@
     <div id="mobile-nav-drawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
       <a href="index.html" class="mobile-nav-link">Overview</a>
       <a href="dashboard.html" class="mobile-nav-link">Dashboard</a>
+      <a href="resume-review.html" class="mobile-nav-link active">Resume</a>
       <a href="roles.html" class="mobile-nav-link">Roles</a>
+      <a href="coding.html" class="mobile-nav-link">Coding Profile</a>
       <a href="roadmap.html" class="mobile-nav-link">Roadmap</a>
-      <a href="resume-review.html" class="mobile-nav-link active">Resume Review</a>
-      <a href="coding.html" class="mobile-nav-link">Coding Signal</a>
-      <a href="analytics.html" class="mobile-nav-link">Market Analytics</a>
     </div>
   </header>
 
@@ -66,31 +60,101 @@
     <!-- Page Header -->
     <section class="page-header">
       <div class="page-header-content">
-        <span class="eyebrow-pill">Critique & Signal</span>
-        <h1 class="page-title">Resume Advisor & Scorecard.</h1>
+        <span class="eyebrow-pill">Ingestion &amp; Signal</span>
+        <h1 class="page-title">Resume &amp; Technical Skills.</h1>
         <p class="page-subtitle">
-          Objective evaluation of your resume across quantification, active leadership verbs, technical keyword density, and fluff elimination.
+          Upload your resume to extract skills, correct detected competencies, and evaluate your profile with objective scoring.
         </p>
       </div>
     </section>
 
-    <!-- Source Selection & Input Card -->
+    <!-- 1. Resume Upload Card -->
+    <section class="card mb-8">
+      <div class="card-header flex items-center justify-between pb-4 border-b border-border">
+        <div>
+          <h2 class="card-title text-xl font-display">Resume Upload</h2>
+          <p class="card-subtitle text-xs text-muted-foreground">Upload your PDF or DOCX resume for in-memory skill parsing.</p>
+        </div>
+        <span class="pill pill-secondary font-mono text-xs">Deterministic In-Memory Engine</span>
+      </div>
+
+      <div class="card-body pt-6 space-y-4">
+        <div id="resume-drop-zone" class="card-dashed" style="padding: 2.5rem 1.5rem; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+          <div style="width: 3rem; height: 3rem; border-radius: var(--radius-full); background: var(--foreground); color: var(--background); display: grid; place-items: center; margin: 0 auto 1rem;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <h3 style="font-family:var(--font-display); font-size:1.2rem; margin-bottom:0.25rem;">Drop your resume here</h3>
+          <p style="font-size:0.85rem; color:var(--muted-foreground); margin-bottom:0.75rem;">
+            PDF or DOCX &bull; Maximum 5MB &bull; Parsed in memory
+          </p>
+          <div id="resume-filename" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--foreground); font-weight:500;"></div>
+          <input type="file" id="resume-file-input" accept=".pdf,.docx" class="hidden" aria-label="Upload resume file" />
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <span id="upload-status-text" class="text-xs text-muted-foreground font-mono">No file chosen</span>
+          <button id="resume-upload-btn" class="btn btn-primary" type="button" disabled>
+            Parse &amp; Ingest Resume
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Extracted Skills & Corrections Card -->
+    <section id="skills-management-card" class="card mb-8">
+      <div class="card-header flex items-center justify-between pb-4 border-b border-border">
+        <div>
+          <h2 class="card-title text-xl font-display">Extracted Skills &amp; Competencies</h2>
+          <p class="card-subtitle text-xs text-muted-foreground">Verify detected skills, remove inaccuracies, and add unlisted tools.</p>
+        </div>
+        <span id="skills-count-badge" class="eyebrow-pill" style="font-family:var(--font-mono); font-size:0.75rem;">0 Skills</span>
+      </div>
+
+      <div class="card-body pt-6 space-y-5">
+        <!-- Interactive Skills Chip Display -->
+        <div>
+          <label class="text-xs font-mono uppercase tracking-wider text-muted-foreground block mb-2">Active Technical Skills</label>
+          <div id="skills-chip-container" class="flex flex-wrap gap-2 min-h-[48px] p-3 rounded-xl border border-border bg-card">
+            <span class="text-xs text-muted-foreground italic self-center">Upload a resume above to see extracted skills.</span>
+          </div>
+        </div>
+
+        <!-- Add Custom Skill Form -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <input
+            id="custom-skill-input"
+            type="text"
+            class="form-input text-xs"
+            placeholder="Add unlisted skill (e.g. Kubernetes, PyTorch, GraphQL)..."
+            style="flex: 1; min-width: 200px;"
+          />
+          <button id="btn-add-skill" class="btn btn-outline text-xs" type="button">
+            + Add Skill
+          </button>
+          <button id="btn-confirm-skills" class="btn btn-primary text-xs" type="button">
+            Confirm &amp; Save Skills &rarr;
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Resume Source Text & Scorecard Card -->
     <section class="card mb-12">
       <div class="card-header flex items-center justify-between pb-4 border-b border-border">
         <div>
-          <h2 class="card-title text-xl font-display">Resume Source</h2>
-          <p class="card-subtitle text-xs text-muted-foreground">Audit your currently uploaded resume or paste raw text below.</p>
+          <h2 class="card-title text-xl font-display">Resume Advisor &amp; Scorecard</h2>
+          <p class="card-subtitle text-xs text-muted-foreground">Audit your resume text for metrics, verb strength, and fluff elimination.</p>
         </div>
-        <span class="pill pill-secondary font-mono text-xs">Rule-Based + Heuristic Engine</span>
+        <span class="pill pill-secondary font-mono text-xs">Objective Heuristic Engine</span>
       </div>
 
       <div class="card-body pt-6 space-y-4">
         <div class="flex flex-wrap gap-3">
           <button id="btn-use-uploaded" class="btn btn-outline text-sm" type="button">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-            Use Active Uploaded Resume
+            Sync from Uploaded Resume
           </button>
-          <span class="text-xs text-muted-foreground self-center">or paste custom text:</span>
+          <span class="text-xs text-muted-foreground self-center">or paste raw content:</span>
         </div>
 
         <div>
@@ -106,7 +170,7 @@
         <div class="flex items-center justify-between pt-2">
           <span id="char-counter" class="text-xs text-muted-foreground font-mono">0 characters</span>
           <button id="btn-run-review" class="btn btn-primary" type="button">
-            Analyze & Score Resume
+            Analyze &amp; Score Resume
           </button>
         </div>
       </div>
@@ -145,7 +209,7 @@
           <!-- Dimension 1: Quantification -->
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs font-medium">
-              <span>Quantification & Metrics</span>
+              <span>Quantification &amp; Metrics</span>
               <span id="score-dim-quant" class="font-mono text-muted-foreground">0 / 25</span>
             </div>
             <div class="h-2 w-full bg-secondary rounded-full overflow-hidden">
@@ -157,7 +221,7 @@
           <!-- Dimension 2: Action Verbs -->
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs font-medium">
-              <span>Action Verbs & Leadership Voice</span>
+              <span>Action Verbs &amp; Leadership Voice</span>
               <span id="score-dim-verbs" class="font-mono text-muted-foreground">0 / 25</span>
             </div>
             <div class="h-2 w-full bg-secondary rounded-full overflow-hidden">
@@ -181,7 +245,7 @@
           <!-- Dimension 4: Brevity & Fluff Penalty -->
           <div class="space-y-1.5">
             <div class="flex justify-between text-xs font-medium">
-              <span>Clarity & Signal-to-Noise Ratio</span>
+              <span>Clarity &amp; Signal-to-Noise Ratio</span>
               <span id="score-dim-clarity" class="font-mono text-muted-foreground">0 / 25</span>
             </div>
             <div class="h-2 w-full bg-secondary rounded-full overflow-hidden">
@@ -236,6 +300,21 @@
       </div>
     </section>
   </main>
+
+  <!-- Global Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-container">
+      <div class="footer-copy">
+        &copy; <span id="footer-year">2026</span> SkillGraph &bull; Paper &amp; Ink edition
+      </div>
+      <div class="footer-links">
+        <a href="index.html" class="ink-underline">Overview</a>
+        <a href="dashboard.html" class="ink-underline">Dashboard</a>
+        <a href="roles.html" class="ink-underline">Roles</a>
+        <a href="roadmap.html" class="ink-underline">Roadmap</a>
+      </div>
+    </div>
+  </footer>
 
   <!-- Notification Toast Container -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>

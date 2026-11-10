@@ -205,6 +205,7 @@ const API = (() => {
         body: JSON.stringify(params)
       }),
       list: () => request("/api/roadmaps", { method: "GET" }),
+      listSaved: () => request("/api/roadmaps", { method: "GET" }),
       get: (id) => request(`/api/roadmaps/${id}`, { method: "GET" }),
       delete: (id) => request(`/api/roadmaps/${id}`, { method: "DELETE" }),
       updateTask: (roadmapId, taskId, status, notes = null) => {
@@ -216,6 +217,10 @@ const API = (() => {
           body: JSON.stringify({ status, notes })
         });
       }
+    },
+
+    get roadmap() {
+      return this.roadmaps;
     },
 
     progress: {

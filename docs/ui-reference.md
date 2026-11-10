@@ -237,7 +237,7 @@ Present on every analytical view (`resume`, `skills`, `github`, `jobs`, `roadmap
 * **Hero Section:**
   * Version badge: `rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground` with pulsing amber dot: `v1.0 • Career readiness, mapped.`
   * Heading: `"Know the exact `*`distance`*` between you and the role you want."` (*distance* italicized in muted taupe).
-  * Description: `"SkillGraph AI reads your resume, listens to your GitHub, and compares you to real job descriptions. Then it hands you a 6-week roadmap. No vibes. Just signal."`
+  * Description: `"SkillGraph reads your resume, listens to your GitHub, and compares you to real job descriptions. Then it hands you a 6-week roadmap. No vibes. Just signal."`
   * CTA Group:
     * Primary Button: `Start free` + right arrow (`->`) linking to `/auth`.
     * Outline Button: `See a live demo` linking to `/dashboard`.
@@ -267,7 +267,7 @@ Present on every analytical view (`resume`, `skills`, `github`, `jobs`, `roadmap
   * Buttons: `Create your graph` (accent gold pill) and `Explore demo` (outline white border pill).
 * **Footer:**
   * Top border `border-t border-border py-8`.
-  * Left: `© {year} SkillGraph AI • Paper & Ink edition`
+  * Left: `© {year} SkillGraph • Paper & Ink edition`
   * Right: Links with `.ink-underline` (`Product` -> `/dashboard`, `Docs`, `GitHub`).
 
 ---

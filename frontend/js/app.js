@@ -15,7 +15,6 @@ const App = (() => {
     setupAuthUI();
     setupAuthListeners();
     updateCopyright();
-    await checkBackendConnectivity();
   };
 
   /**
@@ -32,11 +31,10 @@ const App = (() => {
       const isCurrent = (
         (href === "index.html" && (currentPath.endsWith("index.html") || currentPath.endsWith("/"))) ||
         (href === "dashboard.html" && currentPath.endsWith("dashboard.html")) ||
-        (href === "roles.html" && currentPath.endsWith("roles.html")) ||
-        (href === "roadmap.html" && currentPath.endsWith("roadmap.html")) ||
         (href === "resume-review.html" && currentPath.endsWith("resume-review.html")) ||
+        (href === "roles.html" && currentPath.endsWith("roles.html")) ||
         (href === "coding.html" && currentPath.endsWith("coding.html")) ||
-        (href === "analytics.html" && currentPath.endsWith("analytics.html"))
+        (href === "roadmap.html" && currentPath.endsWith("roadmap.html"))
       );
 
       if (isCurrent) {
@@ -100,11 +98,11 @@ const App = (() => {
     if (isAuth && user) {
       const displayName = user.full_name || user.name || user.email.split("@")[0];
       headerActions.innerHTML = `
-        <span class="eyebrow-pill" style="text-transform:none; font-family:var(--font-sans);">
+        <a href="dashboard.html" class="eyebrow-pill" style="text-transform:none; font-family:var(--font-sans); text-decoration:none;" title="View Profile on Dashboard">
           ${escapeHtml(displayName)}
-        </span>
+        </a>
         <button id="auth-signout-btn" class="btn btn-outline btn-sm" type="button">
-          Sign out
+          Sign Out
         </button>
       `;
 
@@ -116,10 +114,10 @@ const App = (() => {
     } else {
       headerActions.innerHTML = `
         <a href="auth.html?mode=signin" class="btn btn-outline btn-sm">
-          Sign in
+          Sign In
         </a>
         <a href="auth.html?mode=signup" class="btn btn-primary btn-sm">
-          Get started
+          Create Account
         </a>
       `;
     }
@@ -318,28 +316,14 @@ const App = (() => {
   };
 
   /**
-   * Check backend server responsiveness and update badge
+   * Health check utility
    */
   const checkBackendConnectivity = async () => {
-    const badgeElements = document.querySelectorAll(".source-badge");
-
     try {
-      const health = await API.health.check();
-      badgeElements.forEach(badge => {
-        badge.innerHTML = `
-          <span class="status-dot live" aria-hidden="true"></span>
-          <span>Live &bull; ${escapeHtml(health.version || "v1.0")}</span>
-        `;
-        badge.title = `Connected to ${CONFIG.API_BASE_URL}`;
-      });
-    } catch {
-      badgeElements.forEach(badge => {
-        badge.innerHTML = `
-          <span class="status-dot demo" aria-hidden="true"></span>
-          <span>Offline mode</span>
-        `;
-        badge.title = `Backend unreachable. Run backend server at ${CONFIG.API_BASE_URL}`;
-      });
+      return await API.health.check();
+    } catch (err) {
+      console.warn("Backend connectivity check:", err.message);
+      return null;
     }
   };
 

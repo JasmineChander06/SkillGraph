@@ -172,7 +172,7 @@ const Dashboard = (() => {
       } else {
         // Honest empty state for new account (no fabricated scores)
         if (kpiReadiness) kpiReadiness.textContent = "—";
-        if (kpiReadinessSub) kpiReadinessSub.textContent = "Upload resume below";
+        if (kpiReadinessSub) kpiReadinessSub.textContent = "Upload resume in Resume";
         if (kpiSkills) kpiSkills.textContent = "0";
         if (kpiSkillsSub) kpiSkillsSub.textContent = "Awaiting resume parse";
 
@@ -182,8 +182,9 @@ const Dashboard = (() => {
       }
 
       // 2. Fetch saved roadmaps count
+      let savedRoadmaps = [];
       try {
-        const savedRoadmaps = await API.roadmap.listSaved();
+        savedRoadmaps = await API.roadmaps.list();
         if (kpiRoadmaps) {
           kpiRoadmaps.textContent = Array.isArray(savedRoadmaps) ? `${savedRoadmaps.length}` : "0";
         }
@@ -191,8 +192,81 @@ const Dashboard = (() => {
         if (kpiRoadmaps) kpiRoadmaps.textContent = "0";
       }
 
+      // 3. Update dynamic workflow guidance based on real saved data (Requirement 7)
+      updateWorkflowIndicator(resumes, user, savedRoadmaps);
+
     } catch (err) {
       console.warn("Could not load user data:", err.message);
+    }
+  };
+
+  /**
+   * Phase 7: Dynamic Workflow Next Action Indicator
+   */
+  const updateWorkflowIndicator = (resumes, user, savedRoadmaps) => {
+    const card = document.getElementById("workflow-indicator-card");
+    const badge = document.getElementById("workflow-step-badge");
+    const tag = document.getElementById("workflow-step-tag");
+    const headline = document.getElementById("workflow-headline");
+    const subtext = document.getElementById("workflow-subtext");
+    const actionBtn = document.getElementById("workflow-action-btn");
+
+    if (!card || !headline || !actionBtn) return;
+
+    const hasResume = Array.isArray(resumes) && resumes.length > 0;
+    const isSkillsReviewed = (
+      localStorage.getItem(`sg_skills_reviewed_${user?.id}`) === "true" ||
+      localStorage.getItem("sg_skills_reviewed") === "true" ||
+      (hasResume && resumes[0].extracted_skills && resumes[0].extracted_skills.length > 0)
+    );
+    const hasTargetRole = !!(user && user.target_role && user.target_role !== "");
+    const hasRoadmap = Array.isArray(savedRoadmaps) && savedRoadmaps.length > 0;
+
+    if (!hasResume) {
+      // State 1: No resume
+      if (badge) badge.textContent = "Step 1 of 5 • Next Action";
+      if (tag) tag.textContent = "Ingestion";
+      headline.textContent = "Upload your resume to begin.";
+      if (subtext) subtext.textContent = "Ingest your PDF or DOCX resume to extract technical skills and benchmark your readiness.";
+      actionBtn.textContent = "Upload resume →";
+      actionBtn.setAttribute("href", "resume-review.html");
+      actionBtn.className = "btn btn-primary btn-md";
+    } else if (!isSkillsReviewed) {
+      // State 2: Resume uploaded but skills not reviewed
+      if (badge) badge.textContent = "Step 2 of 5 • Next Action";
+      if (tag) tag.textContent = "Verification";
+      headline.textContent = "Review the skills extracted from your resume.";
+      if (subtext) subtext.textContent = "Verify detected competencies, remove false positives, and add unlisted tools.";
+      actionBtn.textContent = "Review skills →";
+      actionBtn.setAttribute("href", "resume-review.html#skills-management-card");
+      actionBtn.className = "btn btn-primary btn-md";
+    } else if (!hasTargetRole) {
+      // State 3: Skills reviewed but no target roles selected
+      if (badge) badge.textContent = "Step 3 of 5 • Next Action";
+      if (tag) tag.textContent = "Taxonomy";
+      headline.textContent = "Choose the career roles you want to explore.";
+      if (subtext) subtext.textContent = "Benchmark your profile against 11 curated role ontologies and compare overlapping requirements.";
+      actionBtn.textContent = "Explore roles →";
+      actionBtn.setAttribute("href", "roles.html");
+      actionBtn.className = "btn btn-primary btn-md";
+    } else if (!hasRoadmap) {
+      // State 4: Role selected, roadmap not generated
+      if (badge) badge.textContent = "Step 4 of 5 • Next Action";
+      if (tag) tag.textContent = "Curriculum";
+      headline.textContent = "Generate your personalized learning roadmap.";
+      if (subtext) subtext.textContent = `Review your skill gaps for ${userTargetRole} and generate an actionable 6-week progression.`;
+      actionBtn.textContent = "Generate roadmap →";
+      actionBtn.setAttribute("href", "roadmap.html");
+      actionBtn.className = "btn btn-primary btn-md";
+    } else {
+      // State 5: Roadmap in progress
+      if (badge) badge.textContent = "Step 5 of 5 • Active Plan";
+      if (tag) tag.textContent = "In Progress";
+      headline.textContent = "Continue your learning plan.";
+      if (subtext) subtext.textContent = "Work through this week's milestone tasks and check off completed objectives.";
+      actionBtn.textContent = "Continue roadmap →";
+      actionBtn.setAttribute("href", "roadmap.html");
+      actionBtn.className = "btn btn-outline btn-md";
     }
   };
 
@@ -235,7 +309,7 @@ const Dashboard = (() => {
             </div>
           </div>
 
-          <a href="#resume-section" class="btn btn-outline btn-sm" style="width:100%; justify-content:center;">
+          <a href="resume-review.html" class="btn btn-outline btn-sm" style="width:100%; justify-content:center;">
             Upload resume to score &rarr;
           </a>
         </div>

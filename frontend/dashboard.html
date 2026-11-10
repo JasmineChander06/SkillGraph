@@ -24,21 +24,16 @@
     <div class="header-container">
       <a href="index.html" class="brand-link" aria-label="SkillGraph Homepage">
         <span class="brand-badge" aria-hidden="true">S</span>
-        <span>SkillGraph<span class="brand-suffix">.ai</span></span>
+        <span>SkillGraph</span>
       </a>
 
       <nav class="nav-links-desktop" aria-label="Primary Navigation">
         <a href="index.html" class="nav-pill">Overview</a>
         <a href="dashboard.html" class="nav-pill active">Dashboard</a>
+        <a href="resume-review.html" class="nav-pill">Resume</a>
         <a href="roles.html" class="nav-pill">Roles</a>
+        <a href="coding.html" class="nav-pill">Coding Profile</a>
         <a href="roadmap.html" class="nav-pill">Roadmap</a>
-        <a href="resume-review.html" class="nav-pill">Resume Review</a>
-        <a href="coding.html" class="nav-pill">Coding Signal</a>
-        <a href="analytics.html" class="nav-pill">Market Analytics</a>
-        <span class="source-badge">
-          <span class="status-dot awaiting" aria-hidden="true"></span>
-          <span>Connecting…</span>
-        </span>
       </nav>
 
       <div class="header-actions">
@@ -53,11 +48,10 @@
     <div id="mobile-nav-drawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
       <a href="index.html" class="mobile-nav-link">Overview</a>
       <a href="dashboard.html" class="mobile-nav-link active">Dashboard</a>
+      <a href="resume-review.html" class="mobile-nav-link">Resume</a>
       <a href="roles.html" class="mobile-nav-link">Roles</a>
+      <a href="coding.html" class="mobile-nav-link">Coding Profile</a>
       <a href="roadmap.html" class="mobile-nav-link">Roadmap</a>
-      <a href="resume-review.html" class="mobile-nav-link">Resume Review</a>
-      <a href="coding.html" class="mobile-nav-link">Coding Signal</a>
-      <a href="analytics.html" class="mobile-nav-link">Market Analytics</a>
     </div>
   </header>
 
@@ -75,7 +69,7 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <a href="#resume-section" class="btn btn-primary btn-sm">
+          <a href="resume-review.html" class="btn btn-primary btn-sm">
             Upload resume &rarr;
           </a>
         </div>
@@ -83,10 +77,10 @@
     </header>
 
     <!-- First-Time User Onboarding Banner -->
-    <section id="onboarding-section" class="card hidden" style="border: 1.5px solid var(--accent); background: var(--card); margin-bottom: 2.5rem; padding: 2rem; box-shadow: var(--shadow-md);">
+    <section id="onboarding-section" class="card hidden" style="border: 1.5px solid var(--accent); background: var(--card); margin-bottom: 2rem; padding: 2rem; box-shadow: var(--shadow-md);">
       <div class="flex items-center justify-between" style="margin-bottom: 1rem;">
         <div>
-          <span class="eyebrow-pill" style="background: var(--accent); color: var(--background);">Step 1 of 2 &bull; Onboarding</span>
+          <span class="eyebrow-pill" style="background: var(--accent); color: var(--background);">Profile Calibration</span>
           <h2 style="font-family: var(--font-display); font-size: 1.5rem; margin-top: 0.35rem;">Tell us about your career goals</h2>
           <p style="font-size: 0.85rem; color: var(--muted-foreground); margin-top: 0.25rem;">
             Provide your background so SkillGraph can accurately calibrate your readiness benchmarks. You can update this later.
@@ -132,7 +126,6 @@
           <div class="form-group" style="grid-column: span 1 / -1;">
             <label class="form-label" for="onboarding-target-role">Initial Target Role</label>
             <select id="onboarding-target-role" class="form-input">
-              <!-- Dynamically populated from /api/roles/ -->
               <option value="backend-engineer">Backend Engineer</option>
               <option value="harness-engineer">Harness Engineer</option>
               <option value="forward-deployed-engineer">Forward Deployed Engineer</option>
@@ -147,12 +140,35 @@
       </form>
     </section>
 
+    <!-- Dynamic Workflow Next Action Card -->
+    <section id="workflow-indicator-card" class="card" style="margin-bottom: 2.25rem; border-left: 4px solid var(--accent); padding: 1.35rem 1.75rem; background: var(--card);">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div style="max-width: 650px;">
+          <div class="flex items-center gap-2" style="margin-bottom: 0.35rem;">
+            <span class="eyebrow-pill" id="workflow-step-badge" style="font-size:0.7rem;">Step 1 of 5 &bull; Next Action</span>
+            <span id="workflow-step-tag" style="font-size:0.75rem; color:var(--muted-foreground); font-family:var(--font-mono);">Setup</span>
+          </div>
+          <h2 id="workflow-headline" style="font-family:var(--font-display); font-size:1.35rem; line-height:1.2; margin-bottom:0.25rem;">
+            Upload your resume to begin.
+          </h2>
+          <p id="workflow-subtext" style="font-size:0.875rem; color:var(--muted-foreground);">
+            Ingest your PDF or DOCX resume to extract technical skills and benchmark your readiness.
+          </p>
+        </div>
+        <div>
+          <a id="workflow-action-btn" href="resume-review.html" class="btn btn-primary btn-md">
+            Upload resume &rarr;
+          </a>
+        </div>
+      </div>
+    </section>
+
     <!-- 1. KPI Stats Grid (4 Columns) -->
     <section aria-label="Key Performance Indicators" class="kpi-grid">
       <div class="card kpi-card">
         <span class="kpi-title">Readiness</span>
         <div id="kpi-readiness" class="kpi-value">—</div>
-        <span id="kpi-readiness-sub" class="kpi-delta">Upload resume below</span>
+        <span id="kpi-readiness-sub" class="kpi-delta">Upload resume in Resume</span>
       </div>
 
       <div class="card kpi-card">
@@ -163,7 +179,7 @@
 
       <div class="card kpi-card">
         <span class="kpi-title">Roles compared</span>
-        <div class="kpi-value">10</div>
+        <div class="kpi-value">11</div>
         <span class="kpi-delta">Curated ontologies</span>
       </div>
 
@@ -181,7 +197,7 @@
         <div class="chart-header flex items-center justify-between">
           <div>
             <h2 class="chart-title">Readiness trajectory</h2>
-            <p class="chart-subtitle">Rolling monthly score across target roles.</p>
+            <p class="chart-subtitle">Rolling score progress across target roles.</p>
           </div>
           <span class="eyebrow-pill" style="font-family:var(--font-mono); font-size:0.7rem;">7 Months</span>
         </div>
@@ -208,14 +224,14 @@
     </section>
 
     <!-- 3. Target Roles Section -->
-    <section aria-label="Target Role Benchmarks" style="margin-bottom: 3.5rem;">
+    <section id="benchmarks" aria-label="Target Role Benchmarks" style="margin-bottom: 3.5rem;">
       <div class="flex items-center justify-between" style="margin-bottom: 1.25rem;">
         <div>
           <span class="eyebrow-pill">Benchmarks</span>
-          <h2 style="font-family:var(--font-display); font-size:1.75rem; margin-top:0.35rem;">Target roles</h2>
+          <h2 style="font-family:var(--font-display); font-size:1.75rem; margin-top:0.35rem;">Target roles &amp; gaps</h2>
         </div>
-        <a href="roadmap.html" class="ink-underline" style="font-size:0.875rem; font-weight:500;">
-          All roadmaps &rarr;
+        <a href="roles.html" class="ink-underline" style="font-size:0.875rem; font-weight:500;">
+          Explore all 11 roles &rarr;
         </a>
       </div>
 
@@ -225,140 +241,72 @@
       </div>
     </section>
 
-    <!-- 4. Quick Action Navigation Cards -->
-    <section aria-label="Quick Actions" class="quick-nav-grid">
-      <a href="#resume-section" class="card quick-nav-card">
+    <!-- 4. Quick Action Navigation Cards (Connecting Workflow) -->
+    <section aria-label="Workflow Navigation" class="quick-nav-grid" style="margin-bottom: 3.5rem;">
+      <a href="resume-review.html" class="card quick-nav-card">
         <div>
           <div class="quick-nav-icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           </div>
-          <h3 class="quick-nav-title">Parse resume</h3>
-          <p class="quick-nav-sub">Extract technical skills and metadata in memory.</p>
+          <h3 class="quick-nav-title">Resume &amp; Skills</h3>
+          <p class="quick-nav-sub">Upload resume, review extracted competencies, and inspect scorecard.</p>
         </div>
         <div class="quick-nav-footer">
-          <span>Upload document</span>
+          <span>Manage Resume</span>
           <span class="quick-nav-arrow">&rarr;</span>
         </div>
       </a>
 
-      <a href="#skills-section" class="card quick-nav-card">
+      <a href="roles.html" class="card quick-nav-card">
         <div>
           <div class="quick-nav-icon" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
-          <h3 class="quick-nav-title">Analyze gaps</h3>
-          <p class="quick-nav-sub">Benchmark skills against 11 curated role ontologies.</p>
+          <h3 class="quick-nav-title">Explore Roles</h3>
+          <p class="quick-nav-sub">Benchmark skills against 11 curated role ontologies and compare paths.</p>
         </div>
         <div class="quick-nav-footer">
-          <span>Evaluate role</span>
+          <span>Explore Roles</span>
           <span class="quick-nav-arrow">&rarr;</span>
         </div>
       </a>
 
-      <a href="#job-section" class="card quick-nav-card">
+      <a href="coding.html" class="card quick-nav-card">
         <div>
           <div class="quick-nav-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
           </div>
-          <h3 class="quick-nav-title">Match a job</h3>
-          <p class="quick-nav-sub">Score any job description for required vs. preferred skills.</p>
+          <h3 class="quick-nav-title">Coding Profile</h3>
+          <p class="quick-nav-sub">Quantify public GitHub shipping proofs and LeetCode problem solving.</p>
         </div>
         <div class="quick-nav-footer">
-          <span>Compare alignment</span>
+          <span>View Profiles</span>
+          <span class="quick-nav-arrow">&rarr;</span>
+        </div>
+      </a>
+
+      <a href="roadmap.html" class="card quick-nav-card">
+        <div>
+          <div class="quick-nav-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h3 class="quick-nav-title">6-Week Roadmap</h3>
+          <p class="quick-nav-sub">Follow structured weekly milestones, capstone project, and tasks.</p>
+        </div>
+        <div class="quick-nav-footer">
+          <span>Open Roadmap</span>
           <span class="quick-nav-arrow">&rarr;</span>
         </div>
       </a>
     </section>
 
-    <!-- 5. Interactive Tool: Resume Ingestion -->
-    <section id="resume-section" class="interactive-tool-section section-anchor">
-      <div style="margin-bottom: 1.5rem;">
-        <span class="eyebrow-pill">Ingest</span>
-        <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Feed the graph.</h2>
-        <p style="color:var(--muted-foreground); margin-top:0.35rem;">
-          Drop your PDF or DOCX resume. We extract skills, tools, and technical competencies in memory.
-        </p>
-      </div>
-
-      <div class="card" style="padding: 2.5rem; text-align: center;">
-        <div id="resume-drop-zone" class="card-dashed" style="padding: 3rem 1.5rem; cursor: pointer; transition: var(--transition-smooth);">
-          <div style="width: 3.5rem; height: 3.5rem; border-radius: var(--radius-full); background: var(--foreground); color: var(--background); display: grid; place-items: center; margin: 0 auto 1.25rem;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          </div>
-          <h3 style="font-family:var(--font-display); font-size:1.35rem; margin-bottom:0.35rem;">Drop your resume here</h3>
-          <p style="font-size:0.875rem; color:var(--muted-foreground); margin-bottom:1rem;">
-            PDF or DOCX &bull; Maximum 5 MB &bull; In-memory text extraction
-          </p>
-          <span id="resume-filename" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--foreground);"></span>
-          <input type="file" id="resume-file-input" accept=".pdf,.docx" class="hidden" aria-label="Upload resume file" />
-        </div>
-
-        <div class="flex items-center justify-center gap-3" style="margin-top: 1.5rem;">
-          <button id="resume-parse-btn" class="btn btn-primary btn-lg" type="button" disabled>
-            Parse resume
-          </button>
-        </div>
-
-        <div id="resume-results" class="hidden" style="margin-top: 1.5rem; text-align: left;"></div>
-      </div>
-    </section>
-
-    <!-- 6. Interactive Tool: Skill Gap Analysis -->
-    <section id="skills-section" class="interactive-tool-section section-anchor">
-      <div style="margin-bottom: 1.5rem;">
-        <span class="eyebrow-pill">Analysis</span>
-        <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Skill-gap analysis.</h2>
-        <p style="color:var(--muted-foreground); margin-top:0.35rem;">
-          Benchmark your resume text against any curated engineering role to see matched, missing, and uncertain competencies.
-        </p>
-      </div>
-
-      <div class="card">
-        <form id="skill-gap-form">
-          <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="skills-role-select">Target Engineering Role</label>
-              <select id="skills-role-select" class="form-select" aria-label="Target Role">
-                <option value="harness-engineer">Harness Engineer</option>
-                <option value="backend-engineer">Backend Engineer</option>
-                <option value="machine-learning-engineer">Machine Learning Engineer</option>
-              </select>
-            </div>
-
-            <div style="display:flex; align-items:flex-end;">
-              <button id="skills-analyze-btn" class="btn btn-primary" type="submit" style="height:44px; width:100%; justify-content:center;">
-                Analyze skill gaps &rarr;
-              </button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="flex items-center justify-between" style="margin-bottom:0.4rem;">
-              <label class="form-label" for="skills-resume-text">Candidate Resume Text</label>
-              <span id="skills-text-synced-badge" class="eyebrow-pill" style="font-size:0.65rem; text-transform:none;">
-                Synced from parsed resume
-              </span>
-            </div>
-            <textarea
-              id="skills-resume-text"
-              class="form-textarea"
-              placeholder="Resume plain text will automatically sync here when you parse a resume above, or you can paste text directly."
-              rows="4"
-            ></textarea>
-          </div>
-        </form>
-
-        <div id="skills-results-container" class="hidden"></div>
-      </div>
-    </section>
-
-    <!-- 7. Interactive Tool: Job Description Matcher -->
-    <section id="job-section" class="interactive-tool-section section-anchor">
+    <!-- 5. Job Description Matcher -->
+    <section id="job-section" class="interactive-tool-section section-anchor" style="margin-bottom: 4rem;">
       <div style="margin-bottom: 1.5rem;">
         <span class="eyebrow-pill">Match</span>
         <h2 style="font-family:var(--font-display); font-size:2rem; margin-top:0.35rem;">Score any job description.</h2>
         <p style="color:var(--muted-foreground); margin-top:0.35rem;">
-          Paste a target job posting. We parse technical requirements and evaluate alignment against your profile.
+          Paste a target job posting to parse technical requirements and evaluate alignment against your profile.
         </p>
       </div>
 
@@ -371,8 +319,8 @@
           <textarea
             id="jd-textarea"
             class="form-textarea"
-            placeholder="Paste complete job description text here (e.g. Senior Harness Engineer at Anthropic. Required: Python, Docker, PyTorch, evaluation pipelines...)"
-            rows="6"
+            placeholder="Paste complete job description text here (e.g. Senior Backend Engineer: Required: Python, Docker, PyTorch, evaluation pipelines...)"
+            rows="5"
           ></textarea>
         </div>
 
@@ -391,12 +339,13 @@
   <footer class="site-footer" role="contentinfo">
     <div class="container footer-container">
       <div class="footer-copy">
-        &copy; <span id="footer-year">2026</span> SkillGraph AI &bull; Paper &amp; Ink edition
+        &copy; <span id="footer-year">2026</span> SkillGraph &bull; Paper &amp; Ink edition
       </div>
       <div class="footer-links">
         <a href="index.html" class="ink-underline">Overview</a>
+        <a href="resume-review.html" class="ink-underline">Resume</a>
+        <a href="roles.html" class="ink-underline">Roles</a>
         <a href="roadmap.html" class="ink-underline">Roadmap</a>
-        <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener noreferrer" class="ink-underline">API Docs &nearr;</a>
       </div>
     </div>
   </footer>

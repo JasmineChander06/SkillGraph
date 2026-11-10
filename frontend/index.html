@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkillGraph — Career readiness, mapped. No vibes. Just signal.</title>
-  <meta name="description" content="SkillGraph maps the semantic distance between your technical skills and curated engineering roles with 6-week actionable roadmaps." />
+  <title>SkillGraph — Know the distance between you and the role you want</title>
+  <meta name="description" content="Understand your skills, compare career paths, identify skill gaps, and follow a personalized roadmap toward your target role." />
 
   <!-- Google Web Fonts (Fraunces Display, Inter Sans, JetBrains Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,21 +23,16 @@
     <div class="header-container">
       <a href="index.html" class="brand-link" aria-label="SkillGraph Homepage">
         <span class="brand-badge" aria-hidden="true">S</span>
-        <span>SkillGraph<span class="brand-suffix">.ai</span></span>
+        <span>SkillGraph</span>
       </a>
 
       <nav class="nav-links-desktop" aria-label="Primary Navigation">
         <a href="index.html" class="nav-pill active">Overview</a>
         <a href="dashboard.html" class="nav-pill">Dashboard</a>
+        <a href="resume-review.html" class="nav-pill">Resume</a>
         <a href="roles.html" class="nav-pill">Roles</a>
+        <a href="coding.html" class="nav-pill">Coding Profile</a>
         <a href="roadmap.html" class="nav-pill">Roadmap</a>
-        <a href="resume-review.html" class="nav-pill">Resume Review</a>
-        <a href="coding.html" class="nav-pill">Coding Signal</a>
-        <a href="analytics.html" class="nav-pill">Market Analytics</a>
-        <span class="source-badge" title="Backend connectivity indicator">
-          <span class="status-dot awaiting" aria-hidden="true"></span>
-          <span>Connecting…</span>
-        </span>
       </nav>
 
       <div class="header-actions">
@@ -55,17 +50,10 @@
     <div id="mobile-nav-drawer" class="mobile-nav-drawer" aria-label="Mobile Navigation">
       <a href="index.html" class="mobile-nav-link active">Overview</a>
       <a href="dashboard.html" class="mobile-nav-link">Dashboard</a>
+      <a href="resume-review.html" class="mobile-nav-link">Resume</a>
       <a href="roles.html" class="mobile-nav-link">Roles</a>
+      <a href="coding.html" class="mobile-nav-link">Coding Profile</a>
       <a href="roadmap.html" class="mobile-nav-link">Roadmap</a>
-      <a href="resume-review.html" class="mobile-nav-link">Resume Review</a>
-      <a href="coding.html" class="mobile-nav-link">Coding Signal</a>
-      <a href="analytics.html" class="mobile-nav-link">Market Analytics</a>
-      <div style="margin-top:0.5rem; padding-top:0.5rem; border-top:1px solid var(--border);">
-        <span class="source-badge">
-          <span class="status-dot awaiting" aria-hidden="true"></span>
-          <span>Connecting…</span>
-        </span>
-      </div>
     </div>
   </header>
 
@@ -73,29 +61,28 @@
   <main id="main-content">
     <section class="container" style="padding-top: clamp(3rem, 8vw, 6rem); padding-bottom: clamp(3rem, 8vw, 5rem); text-align: left;">
       <div style="max-width: 960px;">
-        <!-- Version Badge -->
+        <!-- Eyebrow Tagline -->
         <div class="eyebrow-pill" style="margin-bottom: 1.5rem;">
-          <span class="status-dot awaiting" aria-hidden="true"></span>
-          <span>v1.0 &bull; Career readiness, mapped.</span>
+          <span>Career readiness, mapped.</span>
         </div>
 
         <!-- Headline -->
         <h1 style="font-family: var(--font-display); font-size: clamp(2.75rem, 6.5vw, 5.25rem); line-height: 0.98; letter-spacing: -0.025em; margin-bottom: 1.75rem;">
-          Know the exact <em style="font-style: italic; color: var(--muted-foreground); font-family: var(--font-display);">distance</em> between you and the role you want.
+          Know the distance between you and the role you want.
         </h1>
 
         <!-- Subtitle -->
         <p style="font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.5; color: var(--muted-foreground); max-width: 720px; margin-bottom: 2.5rem;">
-          SkillGraph AI parses your resume, benchmarks you against real engineering profiles, and generates an actionable 6-week curriculum. No vibes. Just signal.
+          Understand your skills, compare career paths, identify skill gaps, and follow a personalized roadmap toward your target role.
         </p>
 
         <!-- CTA Buttons -->
         <div class="flex flex-wrap items-center gap-4" style="margin-bottom: 1.25rem;">
-          <a href="dashboard.html" class="btn btn-primary btn-lg">
-            Create your graph &rarr;
+          <a href="auth.html?mode=signup" class="btn btn-primary btn-lg">
+            Get Started &rarr;
           </a>
-          <a href="auth.html?mode=signup" class="btn btn-outline btn-lg">
-            Start free
+          <a href="#how-it-works" class="btn btn-outline btn-lg">
+            Explore How It Works
           </a>
         </div>
 
@@ -148,61 +135,72 @@
       </div>
     </section>
 
-    <!-- 5. Feature Grid (6 Cards) -->
-    <section class="container" style="padding-bottom: 6rem;">
-      <div style="margin-bottom: 2rem;">
-        <span class="eyebrow-pill">Capabilities</span>
-        <h2 style="font-family: var(--font-display); font-size: 2.25rem; margin-top: 0.5rem;">
-          Every layer of the career graph, quantified.
+    <!-- 5. How It Works / 7-Step Workflow -->
+    <section id="how-it-works" class="container" style="padding-bottom: 6rem;">
+      <div style="margin-bottom: 2.5rem; max-width: 720px;">
+        <span class="eyebrow-pill">Workflow</span>
+        <h2 style="font-family: var(--font-display); font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.1; margin-top: 0.5rem;">
+          How SkillGraph works.
         </h2>
+        <p style="font-size: 1.1rem; line-height: 1.6; color: var(--muted-foreground); margin-top: 0.75rem;">
+          From your current background to your target engineering role in seven clear, evidence-based steps.
+        </p>
       </div>
 
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">01</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">Resume Ingestion</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            Extract plain text and structured skills from PDF and DOCX documents in memory. Zero binary byte retention.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">01</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Create your profile</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Specify your career stage, current technical background, and initial target role so benchmarks reflect your trajectory.
           </p>
         </div>
 
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">02</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">Skill-Gap Analysis</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            Compare candidate profiles against 11 curated role ontologies. Delineate core, recommended, and optional gaps.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">02</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Upload your resume</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Ingest your PDF or DOCX resume. SkillGraph extracts technical skills, tools, and experience deterministically in memory.
           </p>
         </div>
 
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">03</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">Job Description Match</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            Paste unstructured job descriptions to segment required vs. preferred criteria and detect tenure expectations.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">03</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Review your extracted skills</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Inspect detected proficiencies, remove false positives, and add unlisted competencies to establish an accurate baseline.
           </p>
         </div>
 
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">04</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">6-Week Roadmap</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            Dynamic weekly progression ordering foundational concepts before advanced tiers with weekly study caps.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">04</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Explore and compare career roles</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Benchmark your skillset against 11 curated role ontologies and compare overlapping competencies across adjacent career paths.
           </p>
         </div>
 
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">05</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">Interactive Checklist</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            Toggle completion status with optimistic updates and SQLite persistence surviving application restarts.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">05</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Discover skill gaps and career readiness</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Review your quantitative readiness score, matched core skills, and exact missing prerequisites on your personal dashboard.
           </p>
         </div>
 
         <div class="card">
-          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 1rem;">06</div>
-          <h3 style="font-family: var(--font-display); font-size: 1.35rem; margin-bottom: 0.5rem;">Security &amp; IDOR Isolation</h3>
-          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.5;">
-            PBKDF2 salted passwords, JWT bearer tokens, and strict ownership validation on all user resources.
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">06</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Connect your coding profile</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Link your public GitHub activity and LeetCode handle to prove real shipping evidence, languages used, and problem-solving readiness.
+          </p>
+        </div>
+
+        <div class="card" style="grid-column: span 1 / -1; max-width: 580px;">
+          <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted-foreground); margin-bottom: 0.75rem;">07</div>
+          <h3 style="font-family: var(--font-display); font-size: 1.25rem; margin-bottom: 0.5rem;">Follow your personalized roadmap</h3>
+          <p style="font-size: 0.9rem; color: var(--muted-foreground); line-height: 1.55;">
+            Execute a tailored 6-week curriculum with weekly milestones, capstone projects, and persistent task checkboxes.
           </p>
         </div>
       </div>
@@ -221,11 +219,11 @@
           Evaluate your profile against real industry benchmarks and launch your personalized 6-week curriculum.
         </p>
         <div class="flex flex-wrap items-center gap-4">
-          <button class="btn btn-accent btn-lg" onclick="App.openAuthModal('signup')">
-            Create your graph
-          </button>
+          <a href="auth.html?mode=signup" class="btn btn-accent btn-lg">
+            Get Started &rarr;
+          </a>
           <a href="dashboard.html" class="btn btn-outline btn-lg" style="color: var(--background); border-color: rgba(251, 249, 245, 0.4);">
-            Explore demo
+            Open Dashboard
           </a>
         </div>
       </div>
@@ -236,12 +234,13 @@
   <footer class="site-footer" role="contentinfo">
     <div class="container footer-container">
       <div class="footer-copy">
-        &copy; <span id="footer-year">2026</span> SkillGraph AI &bull; Paper &amp; Ink edition
+        &copy; <span id="footer-year">2026</span> SkillGraph &bull; Paper &amp; Ink edition
       </div>
       <div class="footer-links">
         <a href="dashboard.html" class="ink-underline">Dashboard</a>
+        <a href="resume-review.html" class="ink-underline">Resume</a>
+        <a href="roles.html" class="ink-underline">Roles</a>
         <a href="roadmap.html" class="ink-underline">Roadmap</a>
-        <a href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener noreferrer" class="ink-underline">API Docs &nearr;</a>
       </div>
     </div>
   </footer>
