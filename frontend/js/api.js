@@ -94,6 +94,14 @@ const API = (() => {
         body: JSON.stringify(credentials)
       }),
       getMe: () => request("/api/auth/me", { method: "GET" }),
+      forgotPassword: (email) => request("/api/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({ email })
+      }),
+      resetPassword: (token, newPassword) => request("/api/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token, new_password: newPassword })
+      }),
       logout: () => {
         localStorage.removeItem(CONFIG.STORAGE_KEYS.TOKEN);
         localStorage.removeItem(CONFIG.STORAGE_KEYS.USER);

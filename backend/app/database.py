@@ -93,6 +93,10 @@ def init_db(bind_engine=None) -> None:
                     conn.execute(text("ALTER TABLE users ADD COLUMN coding_signal_json TEXT"))
                 if "onboarding_completed" not in cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN onboarding_completed BOOLEAN DEFAULT 0"))
+                if "reset_token_hash" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_hash VARCHAR(255)"))
+                if "reset_token_expires_at" not in cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expires_at DATETIME"))
                 conn.commit()
     except Exception as exc:
         logger.debug("Migration check note: %s", exc)

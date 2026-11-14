@@ -5,13 +5,17 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.database import get_db
 from app.models.user import User
 from app.schemas.auth import (
+    ForgotPasswordRequest,
+    ForgotPasswordResponse,
+    ResetPasswordRequest,
+    ResetPasswordResponse,
     TokenResponse,
     UserLoginRequest,
     UserOnboardingRequest,
@@ -23,6 +27,8 @@ from app.services.auth import (
     create_access_token,
     get_current_user,
     register_user,
+    request_password_reset,
+    reset_password_with_token,
 )
 
 logger = logging.getLogger("skillgraph.api.auth")
@@ -290,4 +296,54 @@ async def update_profile(
         is_active=current_user.is_active,
         created_at=current_user.created_at,
     )
+
+
+# Password Recovery Endpoints
+@router.post(
+    "/api/auth/forgot-password",
+    response_model=ForgotPasswordResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Request a secure password reset link via email",
+)
+@router.post(
+    "/auth/forgot-password",
+    response_model=ForgotPasswordResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False,
+)
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    request: Request,
+    db: Session = Depends(get_db),
+) -> ForgotPasswordResponse:
+    """Initiates password reset for a registered email address.
+
+    Generates a cryptographically random reset token, stores only its SHA-256 hash in the database,
+    dispatches an email containing the reset link, and returns a constant-time generic confirmation.
+    """
+    client_ip = request.client.host if request.client else "unknown"
+    request_password_reset(db=db, email=payload.email, client_ip=client_ip)
+    return ForgotPasswordResponse()
+
+
+@router.post(
+    "/api/auth/reset-password",
+    response_model=ResetPasswordResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Reset password using a cryptographic reset token",
+)
+@router.post(
+    "/auth/reset-password",
+    response_model=ResetPasswordResponse,
+    status_code=status.HTTP_200_OK,
+    include_in_schema=False,
+)
+async def reset_password(
+    payload: ResetPasswordRequest,
+    db: Session = Depends(get_db),
+) -> ResetPasswordResponse:
+    """Verify reset token validity, expiration, update password, and invalidate token immediately."""
+    reset_password_with_token(db=db, token=payload.token, new_password=payload.new_password)
+    return ResetPasswordResponse()
+
 

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
+import secrets
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
@@ -14,8 +17,12 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.database import get_db
 from app.models.user import User, hash_password, verify_password
+from app.services.email import send_password_reset_email
 
 logger = logging.getLogger("skillgraph.services.auth")
+
+# In-memory sliding window rate limiter tracking
+_reset_request_history: Dict[str, list[float]] = {}
 
 # Security Bearer schemes
 security_scheme = HTTPBearer(auto_error=False)
@@ -199,4 +206,124 @@ def authenticate_user(
         )
 
     return user
+
+
+def check_reset_rate_limit(identifier: str) -> None:
+    """Sliding-window rate limiter for password reset requests to mitigate abuse and harassment."""
+    now = time.time()
+    window = settings.RESET_RATE_LIMIT_WINDOW_SECONDS
+    max_attempts = settings.RESET_RATE_LIMIT_MAX_ATTEMPTS
+
+    history = _reset_request_history.get(identifier, [])
+    valid_history = [t for t in history if now - t < window]
+
+    if len(valid_history) >= max_attempts:
+        retry_after = int(window - (now - valid_history[0]))
+        logger.warning("Password reset rate limit exceeded for %s. Retry after %ds", identifier, retry_after)
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Too many password reset requests. Please wait {max(1, retry_after // 60)} minute(s) before trying again.",
+            headers={"Retry-After": str(max(1, retry_after))},
+        )
+
+    valid_history.append(now)
+    _reset_request_history[identifier] = valid_history
+
+
+def hash_reset_token(raw_token: str) -> str:
+    """Compute deterministic SHA-256 hash of a reset token for database persistence."""
+    return hashlib.sha256(raw_token.strip().encode("utf-8")).hexdigest()
+
+
+def generate_reset_token() -> str:
+    """Generate a high-entropy cryptographically random URL-safe token."""
+    return secrets.token_urlsafe(32)
+
+
+def request_password_reset(
+    db: Session,
+    email: str,
+    client_ip: str = "unknown",
+) -> bool:
+    """Initiate password recovery for a candidate email with rate limiting and constant-time response."""
+    normalized_email = email.strip().lower()
+
+    # Rate limit by both client IP and email
+    check_reset_rate_limit(f"ip:{client_ip}")
+    check_reset_rate_limit(f"email:{normalized_email}")
+
+    user = db.query(User).filter(User.email == normalized_email).first()
+    if user and user.is_active:
+        raw_token = generate_reset_token()
+        token_hash = hash_reset_token(raw_token)
+        now_utc = datetime.now(timezone.utc)
+        expires_at = now_utc + timedelta(minutes=settings.RESET_TOKEN_EXPIRE_MINUTES)
+
+        user.reset_token_hash = token_hash
+        user.reset_token_expires_at = expires_at
+        db.commit()
+
+        # Dispatch reset email via SMTP
+        send_password_reset_email(
+            to_email=user.email,
+            recipient_name=user.full_name,
+            reset_token=raw_token,
+        )
+    else:
+        # Constant-time mitigation against timing side-channel attacks
+        hash_password("dummy-timing-mitigation-password")
+        logger.info("Password reset requested for non-existent or inactive email: %s", normalized_email)
+
+    return True
+
+
+def reset_password_with_token(
+    db: Session,
+    token: str,
+    new_password: str,
+) -> User:
+    """Verify reset token, validate expiration, hash new password, and invalidate token."""
+    token_hash = hash_reset_token(token)
+    user = db.query(User).filter(User.reset_token_hash == token_hash).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or already used password reset link. Please request a new one.",
+        )
+
+    now_utc = datetime.now(timezone.utc)
+    expires_at = user.reset_token_expires_at
+
+    if expires_at is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired password reset link.",
+        )
+
+    # Standardize timezone for comparison across SQLite naive and postgres aware timestamps
+    if expires_at.tzinfo is None:
+        expires_at = expires_at.replace(tzinfo=timezone.utc)
+
+    if expires_at < now_utc:
+        # Clean up expired token
+        user.reset_token_hash = None
+        user.reset_token_expires_at = None
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password reset link has expired. Please request a new one.",
+        )
+
+    # Update password with standard PBKDF2 salted hash
+    user.hashed_password = hash_password(new_password)
+    # Immediately invalidate reset token (single-use enforcement)
+    user.reset_token_hash = None
+    user.reset_token_expires_at = None
+    db.commit()
+    db.refresh(user)
+
+    logger.info("Successfully updated password for User ID %s via reset token", user.id)
+    return user
+
 

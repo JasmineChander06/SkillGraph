@@ -42,6 +42,8 @@
     currentMode = mode;
     hideAlert();
 
+    const forgotContainer = document.getElementById("forgot-password-container");
+
     if (mode === "signup") {
       tabSignUp.classList.add("active");
       tabSignIn.classList.remove("active");
@@ -52,6 +54,7 @@
       passwordHint.style.display = "inline";
       submitBtn.textContent = "Create account →";
       passwordInput.setAttribute("autocomplete", "new-password");
+      if (forgotContainer) forgotContainer.classList.add("hidden");
     } else {
       tabSignIn.classList.add("active");
       tabSignUp.classList.remove("active");
@@ -62,6 +65,7 @@
       passwordHint.style.display = "none";
       submitBtn.textContent = "Sign in →";
       passwordInput.setAttribute("autocomplete", "current-password");
+      if (forgotContainer) forgotContainer.classList.remove("hidden");
     }
   };
 

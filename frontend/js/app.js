@@ -210,6 +210,9 @@ const App = (() => {
             <div class="form-group">
               <label class="form-label" for="modal-password">Password</label>
               <input id="modal-password" class="form-input" type="password" placeholder="•••••••• (min 8 characters)" required autocomplete="current-password" />
+              <div id="modal-forgot-container" style="display:flex; justify-content:flex-end; margin-top:0.35rem;">
+                <a href="forgot-password.html" class="ink-underline" style="font-size:0.8125rem; color:var(--muted-foreground); text-decoration:none;">Forgot password?</a>
+              </div>
             </div>
 
             <button id="modal-submit-btn" class="btn btn-primary btn-lg" type="submit" style="width:100%; margin-top:1rem;">
@@ -249,6 +252,8 @@ const App = (() => {
       tabSignUp.classList.remove("active");
       nameGroup.classList.add("hidden");
       submitBtn.textContent = "Sign in";
+      const forgot = document.getElementById("modal-forgot-container");
+      if (forgot) forgot.style.display = "flex";
       clearModalAlert();
     });
 
@@ -257,6 +262,8 @@ const App = (() => {
       tabSignIn.classList.remove("active");
       nameGroup.classList.remove("hidden");
       submitBtn.textContent = "Create account";
+      const forgot = document.getElementById("modal-forgot-container");
+      if (forgot) forgot.style.display = "none";
       clearModalAlert();
     });
 

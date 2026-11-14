@@ -57,6 +57,8 @@ class User(Base):
     leetcode_username: Mapped[str | None] = mapped_column(String(100), nullable=True)
     coding_signal_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     onboarding_completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    reset_token_hash: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    reset_token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

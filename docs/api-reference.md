@@ -160,6 +160,61 @@ SkillGraph uses standard HTTP Bearer token authentication with JSON Web Tokens (
 
 ---
 
+### `POST /api/auth/forgot-password` (Alias: `POST /auth/forgot-password`)
+* **Method:** `POST`
+* **Path:** `/api/auth/forgot-password`
+* **Authentication:** None (Public)
+* **Rate Limit:** 5 requests per 15 minutes per IP/email
+* **Description:** Initiates a password recovery process. Generates a cryptographically random token, stores its SHA-256 hash and expiration (20 mins) in the database, sends a branded email with the reset link, and returns a constant-time generic confirmation.
+* **Request Schema (`ForgotPasswordRequest`):**
+  | Field | Type | Required | Description |
+  | :--- | :--- | :--- | :--- |
+  | `email` | `string` (Email) | Yes | Valid registered email address. |
+* **Example Request:**
+  ```json
+  {
+    "email": "candidate@example.com"
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "If an account with that email exists, we've sent password reset instructions to your inbox."
+  }
+  ```
+* **Errors:** `422 Unprocessable Entity` (invalid email format), `429 Too Many Requests` (rate limit exceeded).
+
+---
+
+### `POST /api/auth/reset-password` (Alias: `POST /auth/reset-password`)
+* **Method:** `POST`
+* **Path:** `/api/auth/reset-password`
+* **Authentication:** None (Public, authorized by cryptographic reset token)
+* **Description:** Resets the user's password using the single-use reset token received via email. Validates token expiration, hashes the new password with salted PBKDF2-HMAC-SHA256, updates the user's password, and immediately invalidates the reset token to prevent reuse.
+* **Request Schema (`ResetPasswordRequest`):**
+  | Field | Type | Required | Description |
+  | :--- | :--- | :--- | :--- |
+  | `token` | `string` | Yes | Cryptographic reset token (min 16 chars). |
+  | `new_password` | `string` | Yes | New password satisfying complexity requirements (min 8 chars, 1 upper, 1 lower, 1 digit, 1 special symbol). |
+* **Example Request:**
+  ```json
+  {
+    "token": "4a7f9b8c2e1d0f3a6b5c8e7d4f1a2b3c",
+    "new_password": "NewSecurePassword#2026!"
+  }
+  ```
+* **Successful Response (`200 OK`):**
+  ```json
+  {
+    "status": "success",
+    "message": "Password has been reset successfully. You can now sign in with your new password."
+  }
+  ```
+* **Errors:** `400 Bad Request` (invalid or expired token, already used token), `422 Unprocessable Entity` (weak password failing complexity requirements).
+
+---
+
 ## 4. Resume Parsing & Record Management
 
 ### `POST /api/resume/parse` (Alias: `POST /resume/upload`)

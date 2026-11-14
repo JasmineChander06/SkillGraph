@@ -143,3 +143,57 @@ class ProgressSummaryResponse(BaseModel):
     completion_percentage: float
     active_roadmaps_count: int
     progress_items: List[TaskProgressItem] = Field(default_factory=list)
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Payload to initiate a password reset link."""
+
+    email: str = Field(..., description="Registered email address to receive reset instructions.")
+
+    @field_validator("email")
+    @classmethod
+    def validate_email_format(cls, v: str) -> str:
+        trimmed = v.strip().lower()
+        if not EMAIL_REGEX.match(trimmed):
+            raise ValueError("Invalid email address format.")
+        return trimmed
+
+
+class ForgotPasswordResponse(BaseModel):
+    """Generic response to prevent email enumeration attacks."""
+
+    status: str = Field(default="success")
+    message: str = Field(
+        default="If an account with that email exists, we've sent password reset instructions to your inbox."
+    )
+
+
+class ResetPasswordRequest(BaseModel):
+    """Payload to complete a password reset."""
+
+    token: str = Field(..., min_length=16, description="Cryptographic reset token received via email.")
+    new_password: str = Field(..., min_length=8, description="New strong password.")
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters long.")
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter (A-Z).")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter (a-z).")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one numeric digit (0-9).")
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>\-_=+[\]\\/`~;']", v):
+            raise ValueError("Password must contain at least one special character (!@#$%^&* etc.).")
+        return v
+
+
+class ResetPasswordResponse(BaseModel):
+    """Confirmation response after successful password reset."""
+
+    status: str = Field(default="success")
+    message: str = Field(
+        default="Password has been reset successfully. You can now sign in with your new password."
+    )

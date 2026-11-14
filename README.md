@@ -440,6 +440,8 @@ All endpoints are prefixed with `/api`. Authentication is via `Authorization: Be
 |--------|----------|------|-------------|
 | `POST` | `/api/auth/register` | No | Create a new account |
 | `POST` | `/api/auth/login` | No | Authenticate and receive a JWT token |
+| `POST` | `/api/auth/forgot-password` | No | Request secure password reset email (enumeration protected) |
+| `POST` | `/api/auth/reset-password` | No | Reset password using single-use cryptographic token |
 | `GET` | `/api/auth/me` | Yes | Retrieve current user profile |
 
 ### Resume

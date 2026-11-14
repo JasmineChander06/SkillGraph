@@ -53,6 +53,18 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_ALGORITHM: str = "HS256"
 
+    # Password Reset & Email Configuration (SMTP)
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = "noreply@skillgraph.ai"
+    SMTP_USE_TLS: bool = True
+    FRONTEND_URL: str = "http://127.0.0.1:8000"
+    RESET_TOKEN_EXPIRE_MINUTES: int = 20
+    RESET_RATE_LIMIT_MAX_ATTEMPTS: int = 5
+    RESET_RATE_LIMIT_WINDOW_SECONDS: int = 900  # 15 minutes
+
     # Resume Upload Configuration (Phase 2)
     MAX_UPLOAD_SIZE_BYTES: int = 10 * 1024 * 1024  # 10 MB limit (accommodates high-res PDF/DOCX resumes)
     MIN_TEXT_LENGTH_THRESHOLD: int = 30  # Minimum non-whitespace characters
