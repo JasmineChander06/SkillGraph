@@ -124,3 +124,87 @@ def test_critique_endpoint_empty_payload_returns_422():
     response = client.post("/api/resume/critique", json={})
     assert response.status_code == 422
 
+
+def test_things_to_add_structured_and_context_rich():
+    """Things to Add must provide structured suggestions tied to candidate text."""
+    text = """
+    Jane Doe | Developer | github.com/janedoe
+    EXPERIENCE
+    - Developed a machine learning project using Python and Scikit-learn.
+    - Built backend APIs using FastAPI and connected to PostgreSQL database.
+    """
+    res = critique_resume_text(text, target_role_id="machine-learning-engineer")
+    assert len(res.things_to_add) > 0
+
+    first_add = res.things_to_add[0]
+    assert hasattr(first_add, "suggestion")
+    assert hasattr(first_add, "section")
+    assert hasattr(first_add, "why")
+    assert hasattr(first_add, "context")
+    assert hasattr(first_add, "needs_user_input")
+    assert first_add.needs_user_input is True
+    assert len(first_add.suggestion) > 0
+
+
+def test_things_to_remove_structured_with_actions():
+    """Things to Remove must extract actual sentences and assign REMOVE/REWRITE/KEEP."""
+    text = """
+    Jane Doe | Developer | github.com/janedoe
+    EXPERIENCE
+    - Worked on various academic and portfolio projects.
+    - Responsible for database maintenance and bug fixes.
+    - Date of Birth: 15/08/2000
+    - Architected high-throughput microservices in FastAPI handling 200k daily requests with 99.9% uptime.
+    """
+    res = critique_resume_text(text)
+    assert len(res.things_to_remove) > 0
+
+    actions = [r.action for r in res.things_to_remove]
+    assert "REWRITE" in actions
+    assert "REMOVE" in actions
+
+    # Check that original text matches
+    orig_lines = [r.original_line for r in res.things_to_remove]
+    assert any("Worked on various academic and portfolio projects." in l for l in orig_lines)
+    assert any("Date of Birth" in l for l in orig_lines)
+
+
+def test_bullet_point_optimizer_dynamic_and_no_fabrication():
+    """Bullet Point Optimizer rewrites actual bullets without fabricating metrics."""
+    text = """
+    Jane Doe | Developer | github.com/janedoe
+    EXPERIENCE
+    - Built backend APIs using FastAPI and connected to PostgreSQL database.
+    - Responsible for data preprocessing and cleaning structured datasets.
+    """
+    res = critique_resume_text(text)
+    assert len(res.bullet_improvements) >= 2
+
+    for b in res.bullet_improvements:
+        assert len(b.original) > 0
+        assert len(b.improved) > 0
+        assert len(b.reason) > 0
+        # Must not fabricate fake percentage or fake metrics — placeholders must be bracketed if missing
+        assert not ("30% faster" in b.improved or "sub-50ms" in b.improved or "2,500 daily requests" in b.improved)
+        # Should contain bracketed guidance placeholder if unquantified
+        assert "[" in b.improved and "]" in b.improved
+
+
+def test_role_aware_critique_personalization():
+    """Target role must personalize skill gap additions and summary."""
+    text = """
+    Jane Doe | Developer | github.com/janedoe
+    EXPERIENCE
+    - Built backend applications using Python and FastAPI.
+    """
+    res_ml = critique_resume_text(text, target_role_id="machine-learning-engineer")
+    assert res_ml.target_role_title == "Machine Learning Engineer"
+    ml_suggestions = [a.suggestion for a in res_ml.things_to_add]
+    assert any("PyTorch" in s or "MLflow" in s or "machine learning" in s.lower() for s in ml_suggestions)
+
+    res_be = critique_resume_text(text, target_role_id="backend-engineer")
+    assert res_be.target_role_title == "Backend Engineer"
+    be_suggestions = [a.suggestion for a in res_be.things_to_add]
+    assert any("PostgreSQL" in s or "Docker" in s or "Redis" in s or "API" in s for s in be_suggestions)
+
+

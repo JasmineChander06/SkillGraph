@@ -359,5 +359,10 @@ async def critique_resume(
             detail="Please provide resume text or specify a valid resume_id to critique.",
         )
 
-    return critique_resume_text(text_to_analyze)
+    # Resolve target role: from payload, or from user profile
+    target_role = payload.target_role
+    if not target_role and current_user:
+        target_role = current_user.target_role
+
+    return critique_resume_text(text_to_analyze, target_role_id=target_role)
 
