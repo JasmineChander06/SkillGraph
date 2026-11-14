@@ -160,3 +160,4 @@ def send_password_reset_email(to_email: str, recipient_name: Optional[str], rese
         # Even if SMTP provider fails, log the recovery link for operational reliability
         logger.info("FALLBACK RECOVERY LINK for %s: %s", to_email, reset_url)
         return False
+
