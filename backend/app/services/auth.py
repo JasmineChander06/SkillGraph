@@ -263,12 +263,21 @@ def request_password_reset(
         user.reset_token_expires_at = expires_at
         db.commit()
 
-        # Dispatch reset email via SMTP
-        send_password_reset_email(
+        # Dispatch reset email via configured email service (Resend or SMTP)
+        delivered = send_password_reset_email(
             to_email=user.email,
             recipient_name=user.full_name,
             reset_token=raw_token,
         )
+        if not delivered:
+            user.reset_token_hash = None
+            user.reset_token_expires_at = None
+            db.commit()
+            logger.error("Failed to deliver password reset email to %s", normalized_email)
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Email delivery service is currently unavailable. Please check backend email configuration or try again later.",
+            )
     else:
         # Constant-time mitigation against timing side-channel attacks
         hash_password("dummy-timing-mitigation-password")

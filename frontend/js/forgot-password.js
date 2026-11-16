@@ -55,10 +55,10 @@
       try {
         await API.auth.forgotPassword(email);
 
-        // Hide form and show confirmation
+        // Hide form and show generic confirmation without revealing email or account existence
         form.classList.add("hidden");
         if (noticeText) {
-          noticeText.innerHTML = `If an account is associated with <strong>${App.escapeHtml(email)}</strong>, we have dispatched a password reset link. The link will remain active for 20 minutes.`;
+          noticeText.textContent = "If an account exists with the email address you entered, we will send a password reset link.";
         }
         successView?.classList.remove("hidden");
 
@@ -66,6 +66,8 @@
         let msg = err.message || "Failed to process password reset. Please try again.";
         if (err.status === 429) {
           msg = err.message || "Too many password reset requests. Please wait a few minutes before trying again.";
+        } else if (err.status === 503) {
+          msg = err.message || "Email delivery service is currently unavailable. Please try again later.";
         }
         showAlert(msg, "error");
         submitBtn.disabled = false;

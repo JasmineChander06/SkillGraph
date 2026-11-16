@@ -53,13 +53,15 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     JWT_ALGORITHM: str = "HS256"
 
-    # Password Reset & Email Configuration (SMTP)
+    # Password Reset & Email Configuration (Resend API & SMTP)
+    RESEND_API_KEY: str = ""
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
     SMTP_USERNAME: str = ""
     SMTP_PASSWORD: str = ""
     SMTP_FROM_EMAIL: str = "noreply@skillgraph.ai"
     SMTP_USE_TLS: bool = True
+    SMTP_SSL: bool = False
     FRONTEND_URL: str = "http://127.0.0.1:8000"
     RESET_TOKEN_EXPIRE_MINUTES: int = 20
     RESET_RATE_LIMIT_MAX_ATTEMPTS: int = 5

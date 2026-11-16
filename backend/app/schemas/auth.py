@@ -164,7 +164,7 @@ class ForgotPasswordResponse(BaseModel):
 
     status: str = Field(default="success")
     message: str = Field(
-        default="If an account with that email exists, we've sent password reset instructions to your inbox."
+        default="If an account exists with the email address you entered, we will send a password reset link."
     )
 
 
