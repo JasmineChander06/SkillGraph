@@ -724,71 +724,63 @@ curl -X PATCH http://127.0.0.1:8000/api/roadmaps/1/tasks/1/progress \
 
 ### ✅ Implemented
 
-- User registration and JWT authentication
-- PDF and DOCX resume parsing (PyMuPDF + python-docx)
-- Regex-based skill extraction from ~60 curated skill definitions
-- Skill-gap analysis against 11 role profiles (4 traditional, 7 emerging)
-- Job-description analysis with required/preferred skill segmentation
-- Six-week learning roadmap generation with prerequisite ordering
-- Progress tracking with database persistence
-- Role explorer with filtering, comparison, and Jaccard overlap analysis
-- Evidence-aware market summaries (3 roles with verified empirical data)
-- Curated guidance with disclaimers for roles lacking verified market data
-- Responsive frontend (vanilla HTML/CSS/JS, no frameworks)
-- CORS-configured API with Swagger UI documentation
-- 155 automated tests covering all backend features
-- User-data isolation (IDOR protection)
-- Input validation and error handling
+- **User Authentication & Session Security:** Salted PBKDF2-HMAC-SHA256 password hashing, stateless signed JWT access tokens, and strict IDOR user isolation.
+- **Password Recovery & Email System:** Secure token-based password reset supporting transactional Resend API (HTTPS) and authenticated SMTP (STARTTLS/SSL) with sliding-window rate limiting.
+- **In-Memory Resume Parsing:** Zero-storage PDF and DOCX extraction via PyMuPDF and python-docx. Binary files are parsed in RAM and discarded immediately for candidate privacy.
+- **Deterministic Skill-Gap Engine:** Pattern-based extraction from curated skill taxonomies across 11 role profiles (4 traditional, 7 emerging).
+- **Dynamic Resume Content Advisor:** Real-time resume-grounded recommendations including *Things to Add* (missing algorithms, metrics, datasets), *Things to Remove* (generic soft skills, outdated tools), and an interactive *Google XYZ Formula Bullet Point Optimizer*.
+- **Multi-Signal Coding Profile Proofs:** Public GitHub REST and LeetCode GraphQL verification classifying candidate skills into 3 evidence tiers (🟢 Verified Repo, 🟡 Resume Mention, ⚪ Needs Demonstration).
+- **Job Description Matcher:** Paste any live job posting to calculate match rate, critical core gaps, and secondary bonuses.
+- **Six-Week Roadmap Generation:** Personalized weekly study plans with prerequisite dependency ordering and hour-budget bin packing.
+- **Role Explorer & Comparison:** Multi-role comparison with Jaccard skill overlap matrices and evidence-backed market data.
+- **Cloud Production Deployment:** Hosted live on Render with automatic root browser redirection and CORS-isolated endpoints.
+- **Automated Test Suite:** 201 backend integration, security, and edge-case tests with 100% pass rate.
 
-### 🔮 Planned (Not Yet Implemented)
+### 🔮 Planned (Future Roadmap)
 
-- PostgreSQL + pgvector for production deployment and semantic search
-- Semantic skill matching using NLP embeddings (spaCy, Sentence Transformers)
-- GitHub repository analysis for additional skill evidence
-- OAuth 2.0 / SSO integration (Google, GitHub)
-- Email notifications and account verification
-- Resume version history and comparison
-- Collaborative roadmaps and team features
-- Live job-market scraping and aggregation
-- Deployment to cloud hosting (no live deployment currently exists)
-- Mobile-native application
+- **Semantic Skill Matching:** NLP vector embeddings (Sentence Transformers / spaCy) to infer technical competencies from project narratives without exact keyword matches.
+- **Production PostgreSQL Migration with pgvector:** Hosted PostgreSQL migration with vector extensions for semantic role retrieval at scale.
+- **OAuth 2.0 / SSO:** Google and GitHub one-click login alongside email/password credentials.
+- **Live Job Market Aggregation:** Periodic ingestion of real-time market demand signals via public job board APIs with source attribution.
+- **Export Capabilities:** Client-side vector PDF and JSON export of generated roadmaps and gap analyses.
+- **Account Email Verification:** Mandatory confirmation links for new account registrations.
+- **Collaborative Engineering Dashboards:** Team roadmaps, peer benchmarking, and mentorship gap tracking.
 
 ---
 
 ## Known Limitations
 
-1. **Regex-only skill extraction** — Skill matching relies on keyword patterns and does not understand context. A resume mentioning "Docker" in a negative context ("no experience with Docker") would still register as a match.
+1. **Regex-Based Skill Extraction:** Skill matching relies on deterministic keyword patterns and does not analyze semantic context. For example, a resume stating *"no prior experience with Docker"* would still trigger a keyword match for Docker.
 
-2. **No semantic understanding** — The system cannot infer skills from project descriptions. If a resume describes building a "containerised microservices platform" without mentioning "Docker" or "Kubernetes" by name, those skills will not be detected.
+2. **No Semantic Skill Inference:** The parser cannot deduce underlying skills from descriptive prose without explicit terminology. A bullet describing a *"containerized microservices cluster with automated failover"* will not register Docker or Kubernetes unless explicitly stated by name.
 
-3. **SQLite only** — The current database is SQLite, which is suitable for single-user development but not for concurrent production deployments.
+3. **Curated Role Catalogue Scope:** The role taxonomy consists of 11 curated engineering roles in a versioned JSON schema. Adding new roles currently requires defining core skills, optional skills, and project blueprints in `role_profiles.json`.
 
-4. **Limited market data** — Only 3 of 11 roles (Backend Engineer, Machine Learning Engineer, Data Engineer) have verified empirical market data with documented sources, geography, dates, and sample sizes. The remaining 8 roles display curated guidance with explicit disclaimers.
+4. **Dual Database Architecture (SQLite Default):** Local development uses SQLite in WAL mode for lightweight zero-dependency setup. Production supports PostgreSQL via `DATABASE_URL`, but automatic multi-region database replication is not implemented.
 
-5. **No live job scraping** — Market data is static and curated. The system does not scrape job boards or aggregate live postings.
+5. **Curated Market Data Coverage:** Only 3 of the 11 roles (Backend Engineer, Machine Learning Engineer, Data Engineer) contain empirical salary and demand data with documented sample sizes and geographies. The remaining 8 emerging roles provide qualitative guidance with transparent disclaimers.
 
-6. **No email verification** — Account registration does not require email confirmation.
+6. **No Live Web Scraping:** Market demand indicators are statically curated and verified to avoid unverified scraping or rate-limit fragility. The system does not dynamically scrape external job portals.
 
-7. **No OAuth/SSO** — Authentication is username/password only.
+7. **No Social OAuth/SSO:** Authentication currently supports secure email and password login only; third-party identity providers (Google/GitHub OAuth) are not yet integrated.
 
-8. **Fixed role count** — The role catalogue is a static JSON file with 11 entries. Adding new roles requires editing `role_profiles.json`.
+8. **English Language Only:** Extraction regex patterns, ontology dictionaries, and role profiles are optimized exclusively for English-language resumes.
 
-9. **English only** — Skill matching patterns are English-language only.
+9. **Zero Raw File Persistence by Design:** Uploaded PDF and DOCX binaries are parsed in volatile memory and purged immediately. Original source files cannot be re-downloaded from the platform.
 
-10. **No file persistence** — Uploaded PDF/DOCX files are parsed in memory and discarded. The original files cannot be re-downloaded after upload.
+10. **Unverified Registration Emails:** While password recovery dispatches verified reset links via Resend/SMTP, initial account creation does not mandate email address verification prior to first login.
 
 ---
 
 ## Future Improvements
 
-- **Semantic matching** — Integrate NLP embeddings (e.g., Sentence Transformers) to detect skills from contextual descriptions rather than exact keyword matches.
-- **PostgreSQL migration** — Move to PostgreSQL with pgvector for production-grade persistence and semantic search capabilities.
-- **GitHub analysis** — Parse public GitHub repositories to extract additional skill evidence from code, commit history, and project structure.
-- **OAuth 2.0** — Add Google and GitHub authentication options alongside the existing email/password flow.
-- **Dynamic role catalogue** — Allow administrators to add, edit, and retire role profiles through an admin interface rather than editing JSON files.
-- **Live market integration** — Aggregate job postings from public APIs to provide real-time market demand signals with proper attribution.
-- **Collaborative features** — Team roadmaps, mentorship pairing, and shared progress dashboards.
-- **Export capabilities** — PDF export of skill analyses and roadmaps.
+- **Semantic Embedding Matching:** Integrate lightweight Sentence Transformers to score semantic similarity between resume project descriptions and target role competencies.
+- **Full PostgreSQL + pgvector Migration:** Shift permanent production data storage to PostgreSQL with pgvector for fast cosine-similarity search across resumes and role ontologies.
+- **OAuth 2.0 Authentication:** Add GitHub and Google single sign-on buttons to simplify onboarding.
+- **Dynamic Role Management Interface:** Provide an administrative interface allowing verified curriculum leads to add, modify, or deprecate roles without manual JSON editing.
+- **Real-Time Market Data Feeds:** Ingest verified job data through approved employment APIs (such as Adzuna or GitHub Jobs archives) with proper geographic filtering and source citations.
+- **Roadmap & Analysis PDF Export:** Generate branded, downloadable PDF summary cards of the 6-Week Roadmap and Skill Gap Matrix for offline study.
+- **Collaborative Mentorship Spaces:** Allow candidates to share their 6-week roadmaps and progress with mentors or study groups.
 
 ---
 
