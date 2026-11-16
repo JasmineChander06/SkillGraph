@@ -2,7 +2,7 @@
 
 > **Document Version:** 2.0.0  
 > **Status:** Implemented Production Architecture  
-> **Live Production Deployment:** `https://skillgraph-q32n.onrender.com/frontend/index.html`  
+> **Live Production Deployment:** `https://skillgraph-1-yfq4.onrender.com/frontend/index.html`  
 > **Backend Framework:** Python 3.13 with FastAPI 0.115+  
 > **Database:** SQLAlchemy 2.0 (SQLite with WAL mode / Cloud PostgreSQL via `DATABASE_URL`)  
 > **Frontend:** Pure Semantic HTML5, CSS3 (Paper & Ink OKLCH Tokens), and Vanilla JavaScript (Zero Frameworks, No Bundlers)  
@@ -251,7 +251,7 @@ Roadmap tasks define prerequisite dependencies:
 
 ## 7. Cloud Deployment & Production Configuration
 
-- **Host:** Render Web Service (`https://skillgraph-q32n.onrender.com/frontend/index.html`).
+- **Host:** Render Web Service (`https://skillgraph-1-yfq4.onrender.com/frontend/index.html`).
 - **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - **Root Directory:** `backend`
 - **Build Command:** `pip install -r requirements.txt`

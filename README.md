@@ -2,6 +2,8 @@
 
 **Career-readiness analysis through evidence-based skill-gap detection.**
 
+> 🚀 **Live Production Deployment:** [https://skillgraph-1-yfq4.onrender.com](https://skillgraph-1-yfq4.onrender.com)
+
 SkillGraph is a local-first web application that quantifies the distance between a candidate's demonstrated technical skills and the requirements of specific engineering roles. It parses resumes, identifies skill overlaps and gaps against curated role profiles, compares candidates against job descriptions, and generates personalised six-week learning roadmaps.
 
 > **Important disclaimer:** Skill coverage percentages measure *detected keyword overlap* between a resume and a role profile. They are **not** a hiring probability, a proof of proficiency, or a guarantee of job readiness. Actual hiring decisions depend on experience depth, system-design ability, communication, cultural fit, and many factors that keyword matching cannot assess.
@@ -733,7 +735,7 @@ curl -X PATCH http://127.0.0.1:8000/api/roadmaps/1/tasks/1/progress \
 - **Job Description Matcher:** Paste any live job posting to calculate match rate, critical core gaps, and secondary bonuses.
 - **Six-Week Roadmap Generation:** Personalized weekly study plans with prerequisite dependency ordering and hour-budget bin packing.
 - **Role Explorer & Comparison:** Multi-role comparison with Jaccard skill overlap matrices and evidence-backed market data.
-- **Cloud Production Deployment:** Hosted live on Render with automatic root browser redirection and CORS-isolated endpoints.
+- **Cloud Production Deployment:** Hosted live on Render at [https://skillgraph-1-yfq4.onrender.com](https://skillgraph-1-yfq4.onrender.com) with automatic root browser redirection and CORS-isolated endpoints.
 - **Automated Test Suite:** 201 backend integration, security, and edge-case tests with 100% pass rate.
 
 ### 🔮 Planned (Future Roadmap)
